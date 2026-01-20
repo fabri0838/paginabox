@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Unificado - Sistema de Gestión</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0a0e27;
+            --secondary: #1a1f3a;
+            --accent: #00ff88;
+            --accent-2: #ff006e;
+            --text: #e4e4e7;
+            --text-dim: #a1a1aa;
+            --border: #27273a;
+            --surface: #161b2e;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, #0f1420 100%);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 110, 0.1) 0%, transparent 50%);
+            animation: gradientShift 15s ease infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(10%, 10%); }
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            margin-bottom: 3rem;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .sync-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .sync-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--secondary);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            font-family: 'Space Mono', monospace;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            font-size: 1.2rem;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 0.9rem 1rem 0.9rem 3rem;
+            background: var(--secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+        }
+
+        select {
+            padding: 0.9rem 1rem;
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        button {
+            padding: 0.9rem 1.5rem;
+            background: var(--secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            border-color: var(--accent);
+            background: var(--surface);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, #00cc6a 100%);
+            border-color: var(--accent);
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-2) 0%, #cc0055 100%);
+            border-color: var(--accent-2);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 8px 20px rgba(255, 0, 110, 0.3);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .product-card {
+            background: var(--secondary);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover::before, .product-card.selected::before {
+            transform: scaleX(1);
+        }
+
+        .product-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .product-card.selected {
+            border-color: var(--accent);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+
+        .product-price {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent);
+            font-family: 'Space Mono', monospace;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price-ars {
+            font-size: 1rem;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+        }
+
+        .product-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .badge {
+            padding: 0.3rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-category {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .badge-supplier {
+            background: rgba(255, 0, 110, 0.1);
+            color: var(--accent-2);
+            border: 1px solid rgba(255, 0, 110, 0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 2rem;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .modal-content {
+            background: var(--secondary);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: var(--surface);
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-dim);
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--accent-2);
+            transform: rotate(90deg);
+        }
+
+        .import-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .import-option {
+            padding: 1.5rem;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .import-option:hover {
+            border-color: var(--accent);
+            background: var(--secondary);
+        }
+
+        .import-option.active {
+            border-color: var(--accent);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .option-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .option-desc {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 0.9rem;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        textarea.url-input {
+            min-height: 100px;
+            font-family: monospace;
+            resize: vertical;
+        }
+
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: var(--secondary);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 14, 39, 0.9);
+            backdrop-filter: blur(5px);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>CATÁLOGO_UNIFICADO</h1>
+            <p class="subtitle">Sistema de gestión centralizada de productos y proveedores</p>
+            <div class="sync-status">
+                <div class="sync-indicator"></div>
+                <span>Sincronizado con Google Sheets</span>
+            </div>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-label">Total Productos</div>
+                <div class="stat-value" id="totalProducts">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Proveedores</div>
+                <div class="stat-value" id="totalSuppliers">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Categorías</div>
+                <div class="stat-value" id="totalCategories">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Seleccionados</div>
+                <div class="stat-value" id="selectedCount">0</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Buscar productos por nombre, marca, categoría...">
+            </div>
+
+            <select id="categoryFilter">
+                <option value="">Todas las categorías</option>
+            </select>
+
+            <select id="supplierFilter">
+                <option value="">Todos los proveedores</option>
+            </select>
+
+            <select id="sortBy">
+                <option value="name">Ordenar por Nombre</option>
+                <option value="price-asc">Precio: Menor a Mayor</option>
+                <option value="price-desc">Precio: Mayor a Menor</option>
+                <option value="supplier">Proveedor</option>
+            </select>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-primary" onclick="openImportModal()">⬆️ Importar Productos</button>
+            <button onclick="exportSelected()">📤 Exportar Seleccionados</button>
+            <button onclick="selectAll()">✅ Seleccionar Todo</button>
+            <button onclick="clearSelection()">❌ Limpiar Selección</button>
+            <button onclick="openProvidersModal()">📋 Gestionar Proveedores</button>
+            <button class="btn-danger" onclick="confirmClearCatalog()">🗑️ Vaciar Catálogo</button>
+        </div>
+
+        <div class="products-grid" id="productsGrid"></div>
+    </div>
+
+    <!-- Modal de Importación -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Importar Productos</h2>
+                <button class="close-btn" onclick="closeImportModal()">✕</button>
+            </div>
+
+            <div class="import-options">
+                <div class="import-option" onclick="selectImportMethod('file')">
+                    <div class="option-title">📁 Archivo Excel/CSV</div>
+                    <div class="option-desc">Subir archivo .xlsx, .xls o .csv desde tu computadora</div>
+                </div>
+
+                <div class="import-option" onclick="selectImportMethod('web')">
+                    <div class="option-title">🌐 Página Web</div>
+                    <div class="option-desc">Extraer productos desde una URL (web scraping)</div>
+                </div>
+
+                <div class="import-option" onclick="selectImportMethod('sheets')">
+                    <div class="option-title">📊 Google Sheets</div>
+                    <div class="option-desc">Importar desde Google Sheets (URL público)</div>
+                </div>
+            </div>
+
+            <div id="fileInputContainer" style="display:none;">
+                <div class="form-group">
+                    <label class="filter-label">Seleccionar archivo:</label>
+                    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" class="url-input">
+                </div>
+            </div>
+
+            <div id="urlInputContainer" style="display:none;">
+                <div style="background: rgba(255, 165, 0, 0.1); border: 2px solid rgba(255, 165, 0, 0.3); border-radius: 8px; padding: 0.75rem; margin-bottom: 1rem;">
+                    <div style="font-weight: 600; color: var(--warning); margin-bottom: 0.25rem; font-size: 0.9rem;">💡 Google Sheets con múltiples precios:</div>
+                    <div style="font-size: 0.85rem; color: var(--text-dim); line-height: 1.4;">
+                        Copiá SOLO la columna USD, o el sistema intentará detectar automáticamente
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="filter-label">URL del proveedor (opcional):</label>
+                    <input type="text" id="providerUrl" class="url-input" placeholder="https://ejemplo.com/productos">
+                </div>
+
+                <div class="form-group">
+                    <label class="filter-label" style="margin-bottom: 0.5rem; display: block;">
+                        Pegá el contenido aquí:
+                    </label>
+                    <textarea id="pageContent" class="url-input" rows="6" 
+                              placeholder="Copiá el contenido de la hoja de cálculo y pegalo acá.&#10;&#10;IMPORTANTE para Google Sheets:&#10;- Si tenés columnas de $ (pesos) y USD, copiá SOLO la columna USD&#10;- El sistema detecta: 'USD 100' = dólares, '$ 100' = pesos&#10;- Ejemplo correcto: Producto | USD790,00"
+                              style="resize: vertical; font-family: monospace; font-size: 0.85rem; min-height: 100px; max-height: 200px;"></textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="filter-label">Nombre del Proveedor:</label>
+                <input type="text" id="supplierName" class="url-input" placeholder="Ej: OhMy Gadgets, Patexx, Bellond Group">
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="processImport()">✅ IMPORTAR</button>
+                <button onclick="closeImportModal()">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Proveedores -->
+    <div class="modal" id="providersModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Gestionar Proveedores</h2>
+                <button class="close-btn" onclick="closeProvidersModal()">✕</button>
+            </div>
+
+            <div id="providersList"></div>
+
+            <div class="button-group" style="margin-top: 2rem;">
+                <button onclick="closeProvidersModal()">CERRAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURACIÓN DE GOOGLE SHEETS
+        // ==========================================
+        const SHEET_ID = '18miA785ppfYJztjqNCKB4aZM7xvUJSKen36PhkjrT5Y';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhVGOXed9kW9TmwPAiD8Mcp87fXpQR3PuUuiL7nf2c5sXs8aP5MEfRWGMeaIJig2Sqjw/exec';
+        const SHEET_NAME = 'Hoja 1'; // Cambiá esto si tu hoja tiene otro nombre
+        
+        // URL base para leer datos (no requiere autenticación si el sheet es público)
+        const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
+        // ==========================================
+        // VARIABLES GLOBALES
+        // ==========================================
+        let allProducts = [];
+        let selectedProducts = new Set();
+        let currentImportMethod = null;
+
+        // ==========================================
+        // CARGAR PRODUCTOS DESDE GOOGLE SHEETS
+        // ==========================================
+        async function loadProductsFromSheet() {
+            showLoading(true);
+            try {
+                const response = await fetch(SHEET_URL);
+                const text = await response.text();
+                
+                // Google Sheets devuelve JSONP, necesitamos extraer el JSON
+                const json = JSON.parse(text.substring(47, text.length - 2));
+                
+                if (!json.table || !json.table.rows) {
+                    console.log('No hay productos en el sheet todavía');
+                    allProducts = [];
+                    updateStats();
+                    renderProducts();
+                    showLoading(false);
+                    return;
+                }
+
+                // Convertir las filas del sheet a objetos de productos
+                allProducts = json.table.rows.map((row, index) => {
+                    const cells = row.c || [];
+                    return {
+                        id: cells[0]?.v || index + 1,
+                        name: cells[1]?.v || '',
+                        price_usd: parseFloat(cells[2]?.v) || null,
+                        price_ars: parseFloat(cells[3]?.v) || null,
+                        category: cells[4]?.v || 'General',
+                        supplier: cells[5]?.v || 'Desconocido',
+                        stock: cells[6]?.v || 'Consultar'
+                    };
+                }).filter(p => p.name); // Filtrar productos sin nombre
+
+                console.log(`✅ Cargados ${allProducts.length} productos desde Google Sheets`);
+                
+                updateStats();
+                renderProducts();
+                populateFilters();
+                showNotification(`✅ ${allProducts.length} productos cargados desde Google Sheets`);
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+                showNotification('❌ Error al cargar productos del Google Sheet. Verificá que esté compartido públicamente.');
+                allProducts = [];
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // ==========================================
+        // GUARDAR PRODUCTOS EN GOOGLE SHEETS
+        // ==========================================
+        async function saveProductsToSheet(products) {
+            showLoading(true);
+            try {
+                // Nota: Para ESCRIBIR en Google Sheets necesitamos usar Google Apps Script
+                // Por ahora, mostramos un mensaje indicando que hay que usar la API de Google Sheets
+                
+                const message = `
+⚠️ IMPORTANTE: Para guardar productos en Google Sheets, necesitás configurar Google Apps Script.
+
+OPCIÓN 1 (Recomendada - Manual por ahora):
+1. Abrí tu Google Sheet: https://docs.google.com/spreadsheets/d/${SHEET_ID}
+2. Exportá los productos como CSV desde esta app
+3. Importá el CSV en Google Sheets (Archivo → Importar)
+
+OPCIÓN 2 (Automática - Requiere configuración):
+Necesitás crear un Google Apps Script que permita escribir datos.
+¿Querés que te ayude a configurarlo?
+
+Por ahora, los productos se guardan localmente en tu navegador.
+                `.trim();
+
+                alert(message);
+                
+                // Guardar temporalmente en localStorage como fallback
+                localStorage.setItem('catalogo_productos', JSON.stringify(products));
+                console.log('Productos guardados temporalmente en localStorage');
+                
+            } catch (error) {
+                console.error('Error guardando productos:', error);
+                showNotification('❌ Error al guardar. Productos guardados localmente.');
+                localStorage.setItem('catalogo_productos', JSON.stringify(products));
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // ==========================================
+        // INICIALIZACIÓN
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Inicializando Catálogo Unificado...');
+            loadProductsFromSheet();
+
+            // Event listeners
+            document.getElementById('searchInput').addEventListener('input', renderProducts);
+            document.getElementById('categoryFilter').addEventListener('change', renderProducts);
+            document.getElementById('supplierFilter').addEventListener('change', renderProducts);
+            document.getElementById('sortBy').addEventListener('change', renderProducts);
+        });
+
+        // ==========================================
+        // FUNCIONES DE UI
+        // ==========================================
+        function updateStats() {
+            const suppliers = new Set(allProducts.map(p => p.supplier));
+            const categories = new Set(allProducts.map(p => p.category));
+
+            document.getElementById('totalProducts').textContent = allProducts.length;
+            document.getElementById('totalSuppliers').textContent = suppliers.size;
+            document.getElementById('totalCategories').textContent = categories.size;
+            document.getElementById('selectedCount').textContent = selectedProducts.size;
+        }
+
+        function populateFilters() {
+            const categories = [...new Set(allProducts.map(p => p.category))].sort();
+            const suppliers = [...new Set(allProducts.map(p => p.supplier))].sort();
+
+            const categoryFilter = document.getElementById('categoryFilter');
+            const supplierFilter = document.getElementById('supplierFilter');
+
+            categoryFilter.innerHTML = '<option value="">Todas las categorías</option>';
+            supplierFilter.innerHTML = '<option value="">Todos los proveedores</option>';
+
+            categories.forEach(cat => {
+                categoryFilter.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+
+            suppliers.forEach(sup => {
+                supplierFilter.innerHTML += `<option value="${sup}">${sup}</option>`;
+            });
+        }
+
+        function renderProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const supplierFilter = document.getElementById('supplierFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+
+            let filtered = allProducts.filter(p => {
+                const matchesSearch = !searchTerm || 
+                    p.name.toLowerCase().includes(searchTerm) ||
+                    p.category.toLowerCase().includes(searchTerm) ||
+                    p.supplier.toLowerCase().includes(searchTerm);
+                
+                const matchesCategory = !categoryFilter || p.category === categoryFilter;
+                const matchesSupplier = !supplierFilter || p.supplier === supplierFilter;
+
+                return matchesSearch && matchesCategory && matchesSupplier;
+            });
+
+            // Ordenar
+            filtered.sort((a, b) => {
+                switch(sortBy) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'price-asc':
+                        return (a.price_usd || 0) - (b.price_usd || 0);
+                    case 'price-desc':
+                        return (b.price_usd || 0) - (a.price_usd || 0);
+                    case 'supplier':
+                        return a.supplier.localeCompare(b.supplier);
+                    default:
+                        return 0;
+                }
+            });
+
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+
+            filtered.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                if (selectedProducts.has(product.id)) {
+                    card.classList.add('selected');
+                }
+
+                card.innerHTML = `
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">USD $${product.price_usd ? product.price_usd.toFixed(2) : 'N/A'}</div>
+                    ${product.price_ars ? `<div class="product-price-ars">ARS $${product.price_ars.toLocaleString('es-AR', {minimumFractionDigits: 2})}</div>` : ''}
+                    <div class="product-meta">
+                        <span class="badge badge-category">${product.category}</span>
+                        <span class="badge badge-supplier">${product.supplier}</span>
+                    </div>
+                `;
+
+                card.onclick = () => toggleProductSelection(product.id);
+                grid.appendChild(card);
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 3rem;">No se encontraron productos</p>';
+            }
+        }
+
+        function toggleProductSelection(id) {
+            if (selectedProducts.has(id)) {
+                selectedProducts.delete(id);
+            } else {
+                selectedProducts.add(id);
+            }
+            updateStats();
+            renderProducts();
+        }
+
+        function selectAll() {
+            allProducts.forEach(p => selectedProducts.add(p.id));
+            updateStats();
+            renderProducts();
+        }
+
+        function clearSelection() {
+            selectedProducts.clear();
+            updateStats();
+            renderProducts();
+        }
+
+        // ==========================================
+        // IMPORT/EXPORT
+        // ==========================================
+        function openImportModal() {
+            document.getElementById('importModal').classList.add('active');
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').classList.remove('active');
+            currentImportMethod = null;
+            document.getElementById('fileInputContainer').style.display = 'none';
+            document.getElementById('urlInputContainer').style.display = 'none';
+        }
+
+        function selectImportMethod(method) {
+            currentImportMethod = method;
+            
+            document.querySelectorAll('.import-option').forEach(opt => opt.classList.remove('active'));
+            event.target.closest('.import-option').classList.add('active');
+
+            document.getElementById('fileInputContainer').style.display = method === 'file' ? 'block' : 'none';
+            document.getElementById('urlInputContainer').style.display = (method === 'web' || method === 'sheets') ? 'block' : 'none';
+        }
+
+        async function processImport() {
+            const supplierName = document.getElementById('supplierName').value.trim();
+            
+            if (!supplierName) {
+                showNotification('⚠️ Por favor ingresá el nombre del proveedor');
+                return;
+            }
+
+            if (currentImportMethod === 'web' || currentImportMethod === 'sheets') {
+                await importFromPastedContent();
+            } else if (currentImportMethod === 'file') {
+                showNotification('⚠️ Importación desde archivo aún no implementada. Usá copiar/pegar por ahora.');
+            } else {
+                showNotification('⚠️ Por favor seleccioná un método de importación');
+            }
+        }
+
+        async function importFromPastedContent() {
+            const content = document.getElementById('pageContent').value;
+            const supplierName = document.getElementById('supplierName').value.trim();
+            
+            if (!content.trim()) {
+                showNotification('⚠️ Por favor pegá el contenido de la página');
+                return;
+            }
+
+            if (!supplierName) {
+                showNotification('⚠️ Por favor ingresá el nombre del proveedor');
+                return;
+            }
+
+            showLoading(true);
+
+            setTimeout(async () => {
+                try {
+                    console.log('=== INICIANDO IMPORTACIÓN ===');
+                    console.log('Proveedor:', supplierName);
+                    console.log('Longitud del contenido:', content.length);
+                    
+                    const newProducts = parseWebContent(content, supplierName);
+                    
+                    console.log('Productos parseados:', newProducts.length);
+                    
+                    if (newProducts.length === 0) {
+                        alert('⚠️ No se encontraron productos válidos.\n\nContenido pegado: ' + content.substring(0, 200) + '...\n\nAsegurate de copiar TODO el contenido de la página web.');
+                        showLoading(false);
+                        return;
+                    }
+
+                    // GESTIÓN DE DUPLICADOS
+                    const shouldReplace = confirm(
+                        `✅ Se encontraron ${newProducts.length} productos!\n\n` +
+                        `¿Querés REEMPLAZAR los productos existentes de "${supplierName}"?\n\n` +
+                        `SÍ = Elimina productos viejos y agrega los nuevos\n` +
+                        `NO = Agrega los nuevos sin eliminar los viejos`
+                    );
+
+                    if (shouldReplace) {
+                        allProducts = allProducts.filter(p => p.supplier !== supplierName);
+                    }
+
+                    // Asignar IDs únicos
+                    const maxId = allProducts.length > 0 ? Math.max(...allProducts.map(p => p.id)) : 0;
+                    newProducts.forEach((p, idx) => {
+                        p.id = maxId + idx + 1;
+                    });
+
+                    // Agregar a la lista principal
+                    allProducts.push(...newProducts);
+                    
+                    // Guardar en Google Sheets
+                    await saveProductsToSheet(allProducts);
+                    
+                    updateStats();
+                    renderProducts();
+                    populateFilters();
+                    closeImportModal();
+                    
+                    showNotification(`✅ ${newProducts.length} productos importados de ${supplierName}`);
+                    
+                } catch (error) {
+                    console.error('❌ ERROR DETALLADO:', error);
+                    console.error('Stack:', error.stack);
+                    showNotification(`❌ Error: ${error.message}. Abrí la consola (F12) para ver más detalles.`);
+                } finally {
+                    showLoading(false);
+                }
+            }, 100);
+        }
+
+        // Parser de contenido (mismo que antes)
+        function parseWebContent(content, supplierName) {
+            try {
+                const products = [];
+                const lines = content.split('\n').map(l => l.trim()).filter(l => l);
+                
+                let currentCategory = 'General';
+
+                console.log('=== PARSEO INICIADO ===');
+                console.log('Total líneas:', lines.length);
+                console.log('Proveedor:', supplierName);
+
+                for (let i = 0; i < lines.length; i++) {
+                    try {
+                        const line = lines[i];
+                        
+                        if (!line || line.length < 2) continue;
+
+                        // Detectar categorías
+                        if (line.length < 80 && 
+                            !hasPrice(line) && 
+                            !line.match(/^\d/) &&
+                            line.match(/^[A-ZÁÉÍÓÚÑ\s\-_]+$/i)) {
+                            
+                            if (line.length > 2 && line.length < 50) {
+                                currentCategory = line.trim();
+                                console.log('📂 Categoría:', currentCategory);
+                            }
+                            continue;
+                        }
+
+                        let priceUSD = null;
+                        let priceARS = null;
+                        let productName = '';
+
+                        // CASO 1: Detectar "DOLARES" 
+                        if (/DOLARES|dólares/i.test(line)) {
+                            console.log('💵 DOLARES detectado en línea', i);
+                            
+                            for (let j = Math.max(0, i - 2); j <= Math.min(lines.length - 1, i + 2); j++) {
+                                const nearLine = lines[j];
+                                const match = nearLine.match(/\$\s*(\d{1,4}(?:,\d{2})?)/);
+                                if (match) {
+                                    priceUSD = parseFloat(match[1].replace(',', '.'));
+                                    console.log('  💰 Precio USD:', priceUSD);
+                                    break;
+                                }
+                            }
+                            
+                            for (let j = i - 1; j >= Math.max(0, i - 3); j--) {
+                                const prevLine = lines[j];
+                                if (prevLine && prevLine.length > 5 && prevLine.length < 150) {
+                                    productName = prevLine;
+                                    console.log('  📝 Nombre:', productName);
+                                    break;
+                                }
+                            }
+                        }
+                        // CASO 2: USD pegado al nombre (Google Sheets format)
+                        else if (line.match(/USD\d+/i)) {
+                            const match = line.match(/^(.+?)USD\s*(\d+(?:[.,]\d+)?)/i);
+                            
+                            if (match) {
+                                productName = match[1].trim();
+                                const priceStr = match[2].replace(/\./g, '').replace(',', '.');
+                                priceUSD = parseFloat(priceStr);
+                                
+                                console.log('💵 USD pegado:', productName, '→', priceUSD);
+                            }
+                        }
+                        // CASO 3: Detectar precio con $
+                        else if (line.match(/\$\s*\d/)) {
+                            const match = line.match(/\$\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)/);
+                            
+                            if (match) {
+                                const priceStr = match[1];
+                                const numValue = parseFloat(priceStr.replace(/\./g, '').replace(',', '.'));
+                                
+                                console.log('💵 Precio en línea', i, ':', priceStr, '→', numValue);
+                                
+                                if (priceStr.includes('.') || numValue > 10000) {
+                                    priceARS = numValue;
+                                    console.log('  → PESOS');
+                                } else {
+                                    priceUSD = numValue;
+                                    console.log('  → USD');
+                                }
+                                
+                                for (let j = i - 1; j >= Math.max(0, i - 2); j--) {
+                                    const prevLine = lines[j];
+                                    if (prevLine && !hasPrice(prevLine) && prevLine.length > 5 && prevLine.length < 200) {
+                                        productName = prevLine;
+                                        console.log('  📝 Nombre:', productName);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if ((priceUSD || priceARS) && productName && productName.length > 3) {
+                            productName = productName.trim();
+                            
+                            let finalPriceUSD = priceUSD;
+                            let finalPriceARS = priceARS;
+                            
+                            if (!priceUSD && priceARS) {
+                                finalPriceUSD = Math.round((priceARS / 1520) * 100) / 100;
+                                console.log('  🔄 Conversión ARS→USD:', priceARS, '→', finalPriceUSD);
+                            }
+                            
+                            const isOnlyNumbers = productName.match(/^[\d\s\$,\.\-_|]+$/);
+                            const isSystemWord = productName.match(/^(SI|NO|Stock|Consultar|Navegar|Logo|Buscar|Pedido|Mi pedido|Esta tienda|Catalogo-Box\.html)$/i);
+                            
+                            if (!isOnlyNumbers && !isSystemWord && (finalPriceUSD || finalPriceARS)) {
+                                if (productName.length > 200) {
+                                    productName = productName.substring(0, 200) + '...';
+                                }
+
+                                const newProduct = {
+                                    name: productName,
+                                    price_usd: finalPriceUSD,
+                                    price_ars: finalPriceARS,
+                                    category: currentCategory,
+                                    supplier: supplierName,
+                                    stock: 'Consultar'
+                                };
+
+                                products.push(newProduct);
+                                console.log('✅ AGREGADO:', productName, '| USD:', finalPriceUSD, '| ARS:', finalPriceARS);
+                            } else {
+                                console.log('❌ RECHAZADO:', productName, '| Solo números?:', isOnlyNumbers, '| Palabra sistema?:', isSystemWord);
+                            }
+                        } else {
+                            if (!priceUSD && !priceARS) {
+                                console.log('⚠️ Sin precio válido en línea', i);
+                            }
+                            if (!productName || productName.length <= 3) {
+                                console.log('⚠️ Sin nombre válido en línea', i);
+                            }
+                        }
+                    } catch (lineError) {
+                        console.warn('Error en línea', i, ':', lineError.message);
+                    }
+                }
+
+                console.log('=== PARSEO COMPLETO ===');
+                console.log('Total productos:', products.length);
+                
+                return products;
+                
+            } catch (error) {
+                console.error('ERROR CRÍTICO en parseWebContent:', error);
+                throw new Error('Error al parsear contenido: ' + error.message);
+            }
+        }
+
+        function hasPrice(text) {
+            if (!text) return false;
+            return /\$\s*\d+|USD|DOLAR/i.test(text);
+        }
+
+        function exportSelected() {
+            if (selectedProducts.size === 0) {
+                showNotification('⚠️ No hay productos seleccionados');
+                return;
+            }
+
+            const selected = allProducts.filter(p => selectedProducts.has(p.id));
+            
+            let csv = 'Nombre,Precio USD,Precio ARS,Categoría,Proveedor,Stock\n';
+            selected.forEach(p => {
+                csv += `"${p.name}","${p.price_usd || 'N/A'}","${p.price_ars || 'N/A'}","${p.category}","${p.supplier}","${p.stock}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `productos_seleccionados_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+
+            showNotification(`✅ ${selected.length} productos exportados`);
+        }
+
+        // ==========================================
+        // GESTIÓN DE PROVEEDORES
+        // ==========================================
+        function openProvidersModal() {
+            const suppliers = {};
+            allProducts.forEach(p => {
+                if (!suppliers[p.supplier]) {
+                    suppliers[p.supplier] = { count: 0, categories: new Set() };
+                }
+                suppliers[p.supplier].count++;
+                suppliers[p.supplier].categories.add(p.category);
+            });
+
+            let html = '';
+            Object.keys(suppliers).sort().forEach(supplier => {
+                const info = suppliers[supplier];
+                html += `
+                    <div class="import-option" style="margin-bottom: 1rem;">
+                        <div class="option-title">${supplier}</div>
+                        <div class="option-desc">
+                            ${info.count} productos • ${info.categories.size} categorías
+                        </div>
+                        <button onclick="deleteSupplier('${supplier}')" class="btn-danger" style="margin-top: 0.5rem;">
+                            🗑️ Eliminar Proveedor
+                        </button>
+                    </div>
+                `;
+            });
+
+            document.getElementById('providersList').innerHTML = html || '<p>No hay proveedores</p>';
+            document.getElementById('providersModal').classList.add('active');
+        }
+
+        function closeProvidersModal() {
+            document.getElementById('providersModal').classList.remove('active');
+        }
+
+        async function deleteSupplier(supplier) {
+            if (!confirm(`¿Estás seguro que querés eliminar TODOS los productos de "${supplier}"?`)) {
+                return;
+            }
+
+            allProducts = allProducts.filter(p => p.supplier !== supplier);
+            await saveProductsToSheet(allProducts);
+            updateStats();
+            renderProducts();
+            populateFilters();
+            openProvidersModal();
+            showNotification(`✅ Proveedor "${supplier}" eliminado`);
+        }
+
+        async function confirmClearCatalog() {
+            if (!confirm('⚠️ ATENCIÓN: Esto eliminará TODOS los productos del catálogo.\n\n¿Estás seguro?')) {
+                return;
+            }
+
+            if (!confirm('🚨 ÚLTIMA CONFIRMACIÓN: No hay vuelta atrás.\n\n¿Continuar?')) {
+                return;
+            }
+
+            allProducts = [];
+            selectedProducts.clear();
+            await saveProductsToSheet(allProducts);
+            updateStats();
+            renderProducts();
+            populateFilters();
+            showNotification('🗑️ Catálogo vaciado completamente');
+        }
+
+        // ==========================================
+        // UTILIDADES
+        // ==========================================
+        function showNotification(message) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.textContent = message;
+            document.body.appendChild(notif);
+
+            setTimeout(() => {
+                notif.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('active', show);
+        }
+    </script>
+</body>
+</html>
