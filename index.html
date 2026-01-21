@@ -1076,7 +1076,7 @@
             }, 100);
         }
 
-        // Parser de contenido (mismo que antes)
+        // Parser de contenido - VERSIÓN MEJORADA
         function parseWebContent(content, supplierName) {
             try {
                 const products = [];
@@ -1088,143 +1088,15 @@
                 console.log('Total líneas:', lines.length);
                 console.log('Proveedor:', supplierName);
 
-                for (let i = 0; i < lines.length; i++) {
-                    try {
-                        const line = lines[i];
-                        
-                        if (!line || line.length < 2) continue;
+                // DETECTAR FORMATO AUTOMÁTICAMENTE
+                const formatType = detectFormatType(lines);
+                console.log('📋 Formato detectado:', formatType);
 
-                        // Detectar categorías
-                        if (line.length < 80 && 
-                            !hasPrice(line) && 
-                            !line.match(/^\d/) &&
-                            line.match(/^[A-ZÁÉÍÓÚÑ\s\-_]+$/i)) {
-                            
-                            if (line.length > 2 && line.length < 50) {
-                                currentCategory = line.trim();
-                                console.log('📂 Categoría:', currentCategory);
-                            }
-                            continue;
-                        }
-
-                        let priceUSD = null;
-                        let priceARS = null;
-                        let productName = '';
-
-                        // CASO 1: Detectar "DOLARES" 
-                        if (/DOLARES|dólares/i.test(line)) {
-                            console.log('💵 DOLARES detectado en línea', i);
-                            
-                            for (let j = Math.max(0, i - 2); j <= Math.min(lines.length - 1, i + 2); j++) {
-                                const nearLine = lines[j];
-                                const match = nearLine.match(/\$\s*(\d{1,4}(?:,\d{2})?)/);
-                                if (match) {
-                                    priceUSD = parseFloat(match[1].replace(',', '.'));
-                                    console.log('  💰 Precio USD:', priceUSD);
-                                    break;
-                                }
-                            }
-                            
-                            for (let j = i - 1; j >= Math.max(0, i - 3); j--) {
-                                const prevLine = lines[j];
-                                if (prevLine && prevLine.length > 5 && prevLine.length < 150) {
-                                    productName = prevLine;
-                                    console.log('  📝 Nombre:', productName);
-                                    break;
-                                }
-                            }
-                        }
-                        // CASO 2: USD pegado al nombre (Google Sheets format)
-                        else if (line.match(/USD\d+/i)) {
-                            const match = line.match(/^(.+?)USD\s*(\d+(?:[.,]\d+)?)/i);
-                            
-                            if (match) {
-                                productName = match[1].trim();
-                                const priceStr = match[2].replace(/\./g, '').replace(',', '.');
-                                priceUSD = parseFloat(priceStr);
-                                
-                                console.log('💵 USD pegado:', productName, '→', priceUSD);
-                            }
-                        }
-                        // CASO 3: Detectar precio con $
-                        else if (line.match(/\$\s*\d/)) {
-                            const match = line.match(/\$\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)/);
-                            
-                            if (match) {
-                                const priceStr = match[1];
-                                const numValue = parseFloat(priceStr.replace(/\./g, '').replace(',', '.'));
-                                
-                                console.log('💵 Precio en línea', i, ':', priceStr, '→', numValue);
-                                
-                                if (priceStr.includes('.') || numValue > 10000) {
-                                    priceARS = numValue;
-                                    console.log('  → PESOS');
-                                } else {
-                                    priceUSD = numValue;
-                                    console.log('  → USD');
-                                }
-                                
-                                for (let j = i - 1; j >= Math.max(0, i - 2); j--) {
-                                    const prevLine = lines[j];
-                                    if (prevLine && !hasPrice(prevLine) && prevLine.length > 5 && prevLine.length < 200) {
-                                        productName = prevLine;
-                                        console.log('  📝 Nombre:', productName);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        if ((priceUSD || priceARS) && productName && productName.length > 3) {
-                            productName = productName.trim();
-                            
-                            let finalPriceUSD = priceUSD;
-                            let finalPriceARS = priceARS;
-                            
-                            if (!priceUSD && priceARS) {
-                                finalPriceUSD = Math.round((priceARS / 1520) * 100) / 100;
-                                console.log('  🔄 Conversión ARS→USD:', priceARS, '→', finalPriceUSD);
-                            }
-                            
-                            const isOnlyNumbers = productName.match(/^[\d\s\$,\.\-_|]+$/);
-                            const isSystemWord = productName.match(/^(SI|NO|Stock|Consultar|Navegar|Logo|Buscar|Pedido|Mi pedido|Esta tienda|Catalogo-Box\.html)$/i);
-                            
-                            if (!isOnlyNumbers && !isSystemWord && (finalPriceUSD || finalPriceARS)) {
-                                if (productName.length > 200) {
-                                    productName = productName.substring(0, 200) + '...';
-                                }
-
-                                const newProduct = {
-                                    name: productName,
-                                    price_usd: finalPriceUSD,
-                                    price_ars: finalPriceARS,
-                                    category: currentCategory,
-                                    supplier: supplierName,
-                                    stock: 'Consultar'
-                                };
-
-                                products.push(newProduct);
-                                console.log('✅ AGREGADO:', productName, '| USD:', finalPriceUSD, '| ARS:', finalPriceARS);
-                            } else {
-                                console.log('❌ RECHAZADO:', productName, '| Solo números?:', isOnlyNumbers, '| Palabra sistema?:', isSystemWord);
-                            }
-                        } else {
-                            if (!priceUSD && !priceARS) {
-                                console.log('⚠️ Sin precio válido en línea', i);
-                            }
-                            if (!productName || productName.length <= 3) {
-                                console.log('⚠️ Sin nombre válido en línea', i);
-                            }
-                        }
-                    } catch (lineError) {
-                        console.warn('Error en línea', i, ':', lineError.message);
-                    }
+                if (formatType === 'TABULAR') {
+                    return parseTabularFormat(lines, supplierName);
+                } else {
+                    return parseLinearFormat(lines, supplierName);
                 }
-
-                console.log('=== PARSEO COMPLETO ===');
-                console.log('Total productos:', products.length);
-                
-                return products;
                 
             } catch (error) {
                 console.error('ERROR CRÍTICO en parseWebContent:', error);
@@ -1232,9 +1104,319 @@
             }
         }
 
+        // Detectar tipo de formato
+        function detectFormatType(lines) {
+            let tabCount = 0;
+            let multiColumnCount = 0;
+            
+            // Analizar primeras 20 líneas
+            for (let i = 0; i < Math.min(20, lines.length); i++) {
+                const line = lines[i];
+                
+                // Contar tabuladores
+                if (line.includes('\t')) {
+                    tabCount++;
+                }
+                
+                // Detectar múltiples "columnas" (espacios largos o tabs)
+                if (line.match(/\s{3,}|\t/)) {
+                    multiColumnCount++;
+                }
+            }
+            
+            // Si más del 30% de las líneas tienen tabs o múltiples espacios → formato tabular
+            if (tabCount > 3 || multiColumnCount > 6) {
+                return 'TABULAR';
+            }
+            
+            return 'LINEAR';
+        }
+
+        // Parser para formato TABULAR (Google Sheets copiado)
+        function parseTabularFormat(lines, supplierName) {
+            console.log('📊 Parseando formato TABULAR');
+            const products = [];
+            let currentCategory = 'General';
+
+            for (let i = 0; i < lines.length; i++) {
+                try {
+                    const line = lines[i];
+                    
+                    if (!line || line.length < 2) continue;
+
+                    // Detectar categorías
+                    if (isCategory(line)) {
+                        currentCategory = line.trim();
+                        console.log('📂 Categoría:', currentCategory);
+                        continue;
+                    }
+
+                    // Dividir por tabs o múltiples espacios
+                    const columns = line.split(/\t+|\s{3,}/).map(c => c.trim()).filter(c => c);
+                    
+                    console.log('🔍 Línea', i, '→ Columnas:', columns.length, '→', columns);
+
+                    if (columns.length < 2) continue;
+
+                    // Buscar precio en cualquier columna
+                    let priceUSD = null;
+                    let priceARS = null;
+                    let productName = null;
+                    let priceColumnIndex = -1;
+
+                    // Buscar columna con precio
+                    for (let j = 0; j < columns.length; j++) {
+                        const col = columns[j];
+                        
+                        if (hasPrice(col)) {
+                            const price = extractPrice(col);
+                            if (price) {
+                                priceColumnIndex = j;
+                                
+                                // Determinar si es USD o ARS
+                                const numValue = price.value;
+                                if (price.formatted.includes('.') || numValue > 10000) {
+                                    priceARS = numValue;
+                                    console.log('  💵 ARS encontrado en columna', j, ':', priceARS);
+                                } else {
+                                    priceUSD = numValue;
+                                    console.log('  💵 USD encontrado en columna', j, ':', priceUSD);
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    // Si encontramos precio, buscar nombre en columnas anteriores
+                    if (priceColumnIndex > 0) {
+                        // Concatenar todas las columnas antes del precio como nombre
+                        const nameParts = [];
+                        for (let j = 0; j < priceColumnIndex; j++) {
+                            const col = columns[j];
+                            if (col && col.length > 0 && !hasPrice(col)) {
+                                nameParts.push(col);
+                            }
+                        }
+                        
+                        if (nameParts.length > 0) {
+                            productName = nameParts.join(' ').trim();
+                            console.log('  📝 Nombre encontrado:', productName);
+                        }
+                    }
+
+                    // Si tenemos nombre y precio, crear producto
+                    if (productName && productName.length > 3 && (priceUSD || priceARS)) {
+                        let finalPriceUSD = priceUSD;
+                        let finalPriceARS = priceARS;
+                        
+                        // Convertir ARS a USD si es necesario
+                        if (!priceUSD && priceARS) {
+                            finalPriceUSD = Math.round((priceARS / 1520) * 100) / 100;
+                            console.log('  🔄 Conversión ARS→USD:', priceARS, '→', finalPriceUSD);
+                        }
+
+                        // Validar
+                        if (!isInvalidName(productName)) {
+                            const newProduct = {
+                                name: productName,
+                                price_usd: finalPriceUSD,
+                                price_ars: finalPriceARS,
+                                category: currentCategory,
+                                supplier: supplierName,
+                                stock: 'Consultar'
+                            };
+
+                            products.push(newProduct);
+                            console.log('✅ AGREGADO:', productName, '| USD:', finalPriceUSD);
+                        } else {
+                            console.log('❌ RECHAZADO:', productName, '(nombre inválido)');
+                        }
+                    }
+                    
+                } catch (lineError) {
+                    console.warn('Error en línea', i, ':', lineError.message);
+                }
+            }
+
+            console.log('=== PARSEO TABULAR COMPLETO ===');
+            console.log('Total productos:', products.length);
+            return products;
+        }
+
+        // Parser para formato LINEAR (texto corrido)
+        function parseLinearFormat(lines, supplierName) {
+            console.log('📄 Parseando formato LINEAR');
+            const products = [];
+            let currentCategory = 'General';
+
+            for (let i = 0; i < lines.length; i++) {
+                try {
+                    const line = lines[i];
+                    
+                    if (!line || line.length < 2) continue;
+
+                    // Detectar categorías
+                    if (isCategory(line)) {
+                        currentCategory = line.trim();
+                        console.log('📂 Categoría:', currentCategory);
+                        continue;
+                    }
+
+                    let priceUSD = null;
+                    let priceARS = null;
+                    let productName = '';
+
+                    // CASO 1: Detectar "DOLARES" 
+                    if (/DOLARES|dólares/i.test(line)) {
+                        console.log('💵 DOLARES detectado en línea', i);
+                        
+                        for (let j = Math.max(0, i - 2); j <= Math.min(lines.length - 1, i + 2); j++) {
+                            const nearLine = lines[j];
+                            const price = extractPrice(nearLine);
+                            if (price && price.value < 10000) {
+                                priceUSD = price.value;
+                                console.log('  💰 Precio USD:', priceUSD);
+                                break;
+                            }
+                        }
+                        
+                        for (let j = i - 1; j >= Math.max(0, i - 3); j--) {
+                            const prevLine = lines[j];
+                            if (prevLine && prevLine.length > 5 && prevLine.length < 150) {
+                                productName = prevLine;
+                                console.log('  📝 Nombre:', productName);
+                                break;
+                            }
+                        }
+                    }
+                    // CASO 2: USD pegado al nombre (Google Sheets format)
+                    else if (line.match(/USD\d+/i)) {
+                        const match = line.match(/^(.+?)USD\s*(\d+(?:[.,]\d+)?)/i);
+                        
+                        if (match) {
+                            productName = match[1].trim();
+                            const priceStr = match[2].replace(/\./g, '').replace(',', '.');
+                            priceUSD = parseFloat(priceStr);
+                            
+                            console.log('💵 USD pegado:', productName, '→', priceUSD);
+                        }
+                    }
+                    // CASO 3: Detectar precio con $ o número
+                    else if (hasPrice(line)) {
+                        const price = extractPrice(line);
+                        
+                        if (price) {
+                            const numValue = price.value;
+                            
+                            console.log('💵 Precio en línea', i, ':', price.formatted, '→', numValue);
+                            
+                            if (price.formatted.includes('.') || numValue > 10000) {
+                                priceARS = numValue;
+                                console.log('  → PESOS');
+                            } else {
+                                priceUSD = numValue;
+                                console.log('  → USD');
+                            }
+                            
+                            for (let j = i - 1; j >= Math.max(0, i - 2); j--) {
+                                const prevLine = lines[j];
+                                if (prevLine && !hasPrice(prevLine) && prevLine.length > 5 && prevLine.length < 200) {
+                                    productName = prevLine;
+                                    console.log('  📝 Nombre:', productName);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if ((priceUSD || priceARS) && productName && productName.length > 3) {
+                        productName = productName.trim();
+                        
+                        let finalPriceUSD = priceUSD;
+                        let finalPriceARS = priceARS;
+                        
+                        if (!priceUSD && priceARS) {
+                            finalPriceUSD = Math.round((priceARS / 1520) * 100) / 100;
+                            console.log('  🔄 Conversión ARS→USD:', priceARS, '→', finalPriceUSD);
+                        }
+                        
+                        if (!isInvalidName(productName) && (finalPriceUSD || finalPriceARS)) {
+                            if (productName.length > 200) {
+                                productName = productName.substring(0, 200) + '...';
+                            }
+
+                            const newProduct = {
+                                name: productName,
+                                price_usd: finalPriceUSD,
+                                price_ars: finalPriceARS,
+                                category: currentCategory,
+                                supplier: supplierName,
+                                stock: 'Consultar'
+                            };
+
+                            products.push(newProduct);
+                            console.log('✅ AGREGADO:', productName, '| USD:', finalPriceUSD, '| ARS:', finalPriceARS);
+                        } else {
+                            console.log('❌ RECHAZADO:', productName);
+                        }
+                    }
+                } catch (lineError) {
+                    console.warn('Error en línea', i, ':', lineError.message);
+                }
+            }
+
+            console.log('=== PARSEO LINEAR COMPLETO ===');
+            console.log('Total productos:', products.length);
+            return products;
+        }
+
+        // Funciones auxiliares mejoradas
+        function isCategory(text) {
+            return text.length < 80 && 
+                   !hasPrice(text) && 
+                   !text.match(/^\d/) &&
+                   text.match(/^[A-ZÁÉÍÓÚÑ\s\-_]+$/i) &&
+                   text.length > 2 && 
+                   text.length < 50;
+        }
+
         function hasPrice(text) {
             if (!text) return false;
-            return /\$\s*\d+|USD|DOLAR/i.test(text);
+            return /\$\s*\d+|USD|DOLAR|\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{2})?|\d+[.,]\d{2,3}/i.test(text);
+        }
+
+        function extractPrice(text) {
+            if (!text) return null;
+            
+            // Intentar varios formatos de precio
+            const patterns = [
+                /\$\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)/,  // $13.750,00 o $13750
+                /\$\s*(\d+(?:,\d{2})?)/,                    // $790,00
+                /(\d{1,3}(?:\.\d{3})+(?:,\d{2})?)/,        // 13.750,00
+                /(\d+,\d{2})/,                               // 790,00
+                /(\d{3,})/                                   // 13750
+            ];
+            
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    const formatted = match[1];
+                    const value = parseFloat(formatted.replace(/\./g, '').replace(',', '.'));
+                    if (!isNaN(value) && value > 0) {
+                        return { value, formatted };
+                    }
+                }
+            }
+            
+            return null;
+        }
+
+        function isInvalidName(name) {
+            const isOnlyNumbers = name.match(/^[\d\s\$,\.\-_|]+$/);
+            const isSystemWord = name.match(/^(Navegar|Logo|Buscar|Pedido|Mi pedido|Esta tienda|Catalogo-Box\.html|Precio|Stock|Color|Descripcion|Rubro|Marca|Modelo|Foto|Tera|cpra)$/i);
+            const isJustYesNo = name.match(/^(SI|NO)$/i);
+            
+            return isOnlyNumbers || isSystemWord || isJustYesNo;
         }
 
         function exportSelected() {
