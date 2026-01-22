@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PIXCELL - Catálogo de Productos</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         
         * {
             margin: 0;
@@ -15,252 +15,286 @@
 
         :root {
             --primary: #0a0e27;
-            --secondary: #1a1f3a;
-            --accent: #00FF88;
-            --accent-2: #00D4FF;
-            --text: #e4e4e7;
-            --text-dim: #a1a1aa;
-            --border: #27273a;
+            --secondary: #ffffff;
+            --accent: #00d4ff;
+            --accent-2: #00ff88;
+            --text: #1a1a1a;
+            --text-light: #666;
+            --border: #e5e7eb;
+            --bg: #f9fafb;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --card-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--primary) 0%, #0f1420 100%);
+            background: var(--bg);
             color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
+            line-height: 1.6;
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(0, 212, 255, 0.08) 0%, transparent 50%);
-            animation: gradientShift 20s ease infinite;
-            z-index: -1;
+        /* Header moderno */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        @keyframes gradientShift {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(10%, 10%); }
-        }
-
-        .container {
+        .header-content {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 2rem;
-            padding-bottom: 120px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem 0;
-            animation: fadeIn 0.8s ease;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .logo {
-            font-size: 4rem;
+            font-size: 2rem;
             font-weight: 900;
-            letter-spacing: 0.1em;
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
+            letter-spacing: -0.02em;
         }
 
-        .tagline {
-            color: var(--text-dim);
-            font-size: 1.1rem;
-            font-weight: 300;
-            letter-spacing: 0.05em;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .stats {
+        .header-actions {
             display: flex;
             gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .stat-card {
-            background: var(--secondary);
-            border: 2px solid var(--border);
-            border-radius: 16px;
-            padding: 1rem 1.5rem;
-            display: flex;
             align-items: center;
-            gap: 0.75rem;
         }
 
-        .stat-icon {
-            font-size: 1.5rem;
+        .stats-badge {
+            background: var(--bg);
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-light);
         }
 
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
+        .stats-badge span {
+            color: var(--accent);
             font-weight: 700;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .search-box {
-            flex: 1;
-            min-width: 300px;
+        /* Hero section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
             position: relative;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 1.2rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.2rem;
-            color: var(--text-dim);
-        }
-
-        input[type="text"], select {
-            width: 100%;
-            padding: 1rem 1rem 1rem 3.5rem;
-            background: var(--secondary);
-            border: 2px solid var(--border);
-            border-radius: 16px;
-            color: var(--text);
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
-        }
-
-        input[type="text"]:focus, select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.1);
-        }
-
-        select {
-            padding: 1rem 1.2rem;
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300FF88' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            padding-right: 3rem;
-        }
-
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .product-card {
-            background: var(--secondary);
-            border: 2px solid var(--border);
-            border-radius: 20px;
             overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-            min-height: 120px;
         }
 
-        .product-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--accent);
-            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.15);
-        }
-
-        .product-card.selected {
-            border-color: var(--accent);
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, rgba(0, 212, 255, 0.05) 100%);
-        }
-
-        .product-card.selected::before {
+        .hero::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect fill="%23ffffff" fill-opacity="0.03" width="100" height="100"/></svg>');
+            opacity: 0.1;
         }
 
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            padding-bottom: 120px;
+        }
+
+        /* Controles modernos */
+        .controls {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 1.2rem;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+
+        select {
+            padding: 0.875rem 1rem;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300d4ff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+        }
+
+        /* Grid de productos - estilo moderno */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        /* Card moderna con imagen */
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .product-card.selected {
+            border: 3px solid var(--accent);
+            box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.1);
+        }
+
+        /* Imagen del producto */
+        .product-image-container {
+            width: 100%;
+            height: 280px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .no-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            background: linear-gradient(135deg, 
+                rgba(0, 212, 255, 0.1) 0%, 
+                rgba(0, 255, 136, 0.1) 100%
+            );
+        }
+
+        /* Checkbox de selección - más moderno */
         .product-checkbox {
             position: absolute;
             top: 1rem;
             right: 1rem;
-            width: 32px;
-            height: 32px;
-            background: rgba(10, 14, 39, 0.9);
-            border: 2px solid var(--border);
-            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid white;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 10;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .product-card.selected .product-checkbox {
             background: var(--accent);
             border-color: var(--accent);
+            transform: scale(1.1);
         }
 
         .product-checkbox::after {
             content: '✓';
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: bold;
             color: transparent;
             transition: all 0.3s ease;
         }
 
         .product-card.selected .product-checkbox::after {
-            color: var(--primary);
+            color: white;
         }
 
+        /* Info del producto */
         .product-info {
+            padding: 1.5rem;
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding-right: 3rem;
         }
 
         .product-name {
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             font-weight: 600;
             color: var(--text);
-            line-height: 1.5;
+            line-height: 1.4;
             margin-bottom: 0.75rem;
+            min-height: 3em;
         }
 
         .product-meta {
@@ -271,7 +305,7 @@
         }
 
         .badge {
-            padding: 0.35rem 0.75rem;
+            padding: 0.4rem 0.875rem;
             border-radius: 8px;
             font-size: 0.75rem;
             font-weight: 600;
@@ -280,17 +314,16 @@
         }
 
         .badge-category {
-            background: rgba(0, 255, 136, 0.1);
+            background: rgba(0, 212, 255, 0.1);
             color: var(--accent);
-            border: 1px solid rgba(0, 255, 136, 0.3);
         }
 
         .badge-supplier {
-            background: rgba(0, 212, 255, 0.1);
+            background: rgba(0, 255, 136, 0.1);
             color: var(--accent-2);
-            border: 1px solid rgba(0, 212, 255, 0.3);
         }
 
+        /* Botón WhatsApp flotante - más moderno */
         .whatsapp-button {
             position: fixed;
             bottom: 2rem;
@@ -303,12 +336,12 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1.2rem 2rem;
-            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            padding: 1.25rem 2.5rem;
+            background: #25D366;
             color: white;
             border: none;
             border-radius: 50px;
-            font-size: 1.1rem;
+            font-size: 1.125rem;
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
@@ -319,21 +352,23 @@
         .whatsapp-btn:hover {
             transform: translateY(-4px);
             box-shadow: 0 15px 40px rgba(37, 211, 102, 0.5);
+            background: #128C7E;
         }
 
         .whatsapp-icon {
-            font-size: 1.8rem;
+            font-size: 2rem;
         }
 
         .selection-count {
             background: white;
             color: #25D366;
-            padding: 0.3rem 0.8rem;
+            padding: 0.4rem 0.9rem;
             border-radius: 20px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 800;
         }
 
+        /* Loading */
         .loading {
             display: none;
             position: fixed;
@@ -341,7 +376,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(10, 14, 39, 0.95);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             justify-content: center;
             align-items: center;
@@ -365,10 +400,11 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Empty state */
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
-            color: var(--text-dim);
+            color: var(--text-light);
             grid-column: 1/-1;
         }
 
@@ -378,18 +414,23 @@
             opacity: 0.5;
         }
 
+        /* Responsive */
         @media (max-width: 768px) {
-            .logo {
-                font-size: 3rem;
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
             }
 
             .products-grid {
                 grid-template-columns: 1fr;
-                gap: 1rem;
+                gap: 1.5rem;
             }
 
-            .product-card {
-                min-height: 100px;
+            .product-image-container {
+                height: 220px;
             }
 
             .whatsapp-button {
@@ -411,31 +452,33 @@
         <div class="spinner"></div>
     </div>
 
-    <div class="container">
-        <header>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
             <div class="logo">PIXCELL</div>
-            <div class="tagline">Catálogo de Productos - Seleccioná y Cotizá</div>
-        </header>
-
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-icon">📦</div>
-                <div>
-                    <div class="stat-label">Productos</div>
-                    <div class="stat-value" id="totalProducts">0</div>
+            <div class="header-actions">
+                <div class="stats-badge">
+                    <span id="totalProducts">0</span> Productos
                 </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">✓</div>
-                <div>
-                    <div class="stat-label">Seleccionados</div>
-                    <div class="stat-value" id="selectedCount">0</div>
+                <div class="stats-badge">
+                    <span id="selectedCount">0</span> Seleccionados
                 </div>
             </div>
         </div>
+    </div>
 
+    <!-- Hero -->
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Catálogo de Productos</h1>
+            <p>Seleccioná los productos que te interesan y cotizá por WhatsApp</p>
+        </div>
+    </div>
+
+    <!-- Container -->
+    <div class="container">
         <div class="controls">
-            <div class="search-box">
+            <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
                 <input type="text" id="searchInput" placeholder="Buscar productos...">
             </div>
@@ -452,6 +495,7 @@
         <div class="products-grid" id="productsGrid"></div>
     </div>
 
+    <!-- Botón WhatsApp -->
     <div class="whatsapp-button" id="whatsappButton">
         <button class="whatsapp-btn" onclick="sendWhatsApp()">
             <span class="whatsapp-icon">💬</span>
@@ -465,6 +509,13 @@
         const SHEET_NAME = 'Hoja 1';
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
         const WHATSAPP_NUMBER = '5493513504294';
+
+        const CATEGORY_ICONS = {
+            'audio': '🔊', 'telefonia': '📱', 'informatica': '💻',
+            'hogar': '🏠', 'gaming': '🎮', 'accesorios': '🔌',
+            'tv': '📺', 'fotografia': '📷', 'wearables': '⌚',
+            'general': '📦'
+        };
 
         let allProducts = [];
         let selectedProducts = new Set();
@@ -490,7 +541,8 @@
                         id: cells[0]?.v || index + 1,
                         name: cells[1]?.v || '',
                         category: cells[4]?.v || 'General',
-                        supplier: cells[5]?.v || 'Proveedor'
+                        supplier: cells[5]?.v || 'Proveedor',
+                        image_url: cells[7]?.v || null // Columna H: URL de imagen
                     };
                 }).filter(p => p.name && p.name.length > 3);
 
@@ -551,7 +603,29 @@
                     card.classList.add('selected');
                 }
 
+                const icon = getCategoryIcon(product.category);
+                
+                // Mostrar imagen si hay URL, sino placeholder con emoji
+                let imageHTML;
+                if (product.image_url) {
+                    imageHTML = `
+                        <div class="product-image-container">
+                            <img src="${product.image_url}" 
+                                 alt="${product.name}"
+                                 class="product-image"
+                                 onerror="this.parentElement.innerHTML='<div class=\\'no-image-placeholder\\'>${icon}</div>';">
+                        </div>
+                    `;
+                } else {
+                    imageHTML = `
+                        <div class="product-image-container">
+                            <div class="no-image-placeholder">${icon}</div>
+                        </div>
+                    `;
+                }
+
                 card.innerHTML = `
+                    ${imageHTML}
                     <div class="product-checkbox"></div>
                     <div class="product-info">
                         <div class="product-name">${product.name}</div>
@@ -567,6 +641,14 @@
             });
 
             updateStats();
+        }
+
+        function getCategoryIcon(category) {
+            const cat = category.toLowerCase();
+            for (const [key, icon] of Object.entries(CATEGORY_ICONS)) {
+                if (cat.includes(key)) return icon;
+            }
+            return CATEGORY_ICONS.general;
         }
 
         function toggleSelection(id) {
