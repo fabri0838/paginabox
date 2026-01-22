@@ -180,28 +180,29 @@
             padding-right: 2.5rem;
         }
 
-        /* Grid de productos - estilo moderno */
+        /* Grid de productos */
         .products-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
+            gap: 1.5rem;
         }
 
-        /* Card moderna con imagen */
+        /* Card moderna SIN imagen */
         .product-card {
             background: white;
             border-radius: 16px;
-            overflow: hidden;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: var(--card-shadow);
             display: flex;
             flex-direction: column;
-            height: 100%;
+            padding: 2rem;
+            position: relative;
+            min-height: 140px;
         }
 
         .product-card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-4px);
             box-shadow: var(--card-shadow-hover);
         }
 
@@ -210,56 +211,20 @@
             box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.1);
         }
 
-        /* Imagen del producto */
-        .product-image-container {
-            width: 100%;
-            height: 280px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .product-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .product-card:hover .product-image {
-            transform: scale(1.05);
-        }
-
-        .no-image-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 5rem;
-            background: linear-gradient(135deg, 
-                rgba(0, 212, 255, 0.1) 0%, 
-                rgba(0, 255, 136, 0.1) 100%
-            );
-        }
-
-        /* Checkbox de selección - más moderno */
+        /* Checkbox de selección */
         .product-checkbox {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            width: 36px;
-            height: 36px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 2px solid white;
-            border-radius: 12px;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 32px;
+            height: 32px;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 10;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .product-card.selected .product-checkbox {
@@ -270,7 +235,7 @@
 
         .product-checkbox::after {
             content: '✓';
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: transparent;
             transition: all 0.3s ease;
@@ -282,19 +247,18 @@
 
         /* Info del producto */
         .product-info {
-            padding: 1.5rem;
             flex: 1;
             display: flex;
             flex-direction: column;
+            padding-right: 3rem;
         }
 
         .product-name {
             font-size: 1.125rem;
             font-weight: 600;
             color: var(--text);
-            line-height: 1.4;
-            margin-bottom: 0.75rem;
-            min-height: 3em;
+            line-height: 1.5;
+            margin-bottom: 1rem;
         }
 
         .product-meta {
@@ -323,7 +287,7 @@
             color: var(--accent-2);
         }
 
-        /* Botón WhatsApp flotante - más moderno */
+        /* Botón WhatsApp flotante */
         .whatsapp-button {
             position: fixed;
             bottom: 2rem;
@@ -426,11 +390,11 @@
 
             .products-grid {
                 grid-template-columns: 1fr;
-                gap: 1.5rem;
             }
 
-            .product-image-container {
-                height: 220px;
+            .product-card {
+                padding: 1.5rem;
+                min-height: 120px;
             }
 
             .whatsapp-button {
@@ -510,13 +474,6 @@
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
         const WHATSAPP_NUMBER = '5493513504294';
 
-        const CATEGORY_ICONS = {
-            'audio': '🔊', 'telefonia': '📱', 'informatica': '💻',
-            'hogar': '🏠', 'gaming': '🎮', 'accesorios': '🔌',
-            'tv': '📺', 'fotografia': '📷', 'wearables': '⌚',
-            'general': '📦'
-        };
-
         let allProducts = [];
         let selectedProducts = new Set();
 
@@ -541,8 +498,7 @@
                         id: cells[0]?.v || index + 1,
                         name: cells[1]?.v || '',
                         category: cells[4]?.v || 'General',
-                        supplier: cells[5]?.v || 'Proveedor',
-                        image_url: cells[7]?.v || null // Columna H: URL de imagen
+                        supplier: cells[5]?.v || 'Proveedor'
                     };
                 }).filter(p => p.name && p.name.length > 3);
 
@@ -603,29 +559,7 @@
                     card.classList.add('selected');
                 }
 
-                const icon = getCategoryIcon(product.category);
-                
-                // Mostrar imagen si hay URL, sino placeholder con emoji
-                let imageHTML;
-                if (product.image_url) {
-                    imageHTML = `
-                        <div class="product-image-container">
-                            <img src="${product.image_url}" 
-                                 alt="${product.name}"
-                                 class="product-image"
-                                 onerror="this.parentElement.innerHTML='<div class=\\'no-image-placeholder\\'>${icon}</div>';">
-                        </div>
-                    `;
-                } else {
-                    imageHTML = `
-                        <div class="product-image-container">
-                            <div class="no-image-placeholder">${icon}</div>
-                        </div>
-                    `;
-                }
-
                 card.innerHTML = `
-                    ${imageHTML}
                     <div class="product-checkbox"></div>
                     <div class="product-info">
                         <div class="product-name">${product.name}</div>
@@ -641,14 +575,6 @@
             });
 
             updateStats();
-        }
-
-        function getCategoryIcon(category) {
-            const cat = category.toLowerCase();
-            for (const [key, icon] of Object.entries(CATEGORY_ICONS)) {
-                if (cat.includes(key)) return icon;
-            }
-            return CATEGORY_ICONS.general;
         }
 
         function toggleSelection(id) {
