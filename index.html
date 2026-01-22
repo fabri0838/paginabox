@@ -552,6 +552,9 @@
         const SHEET_NAME = 'Hoja 1';
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
         const WHATSAPP_NUMBER = '5493513504294'; // +54 9 3513 50-4294
+        
+        // API de Pexels para búsqueda automática de imágenes
+        const PEXELS_API_KEY = 'ueoBLWqSSIZHRHNdBQIrMTJgXCN67qvyN6g8K5rUp1QNn2S6JWkGuc7E';
 
         // Emojis para categorías (placeholder si no hay foto)
         const CATEGORY_ICONS = {
@@ -567,11 +570,15 @@
             'general': '📦'
         };
 
+        // Cache de imágenes para evitar búsquedas repetidas
+        const imageCache = {};
+
         // ==========================================
         // VARIABLES GLOBALES
         // ==========================================
         let allProducts = [];
         let selectedProducts = new Set();
+        let loadingImages = new Set();
 
         // ==========================================
         // CARGAR PRODUCTOS
@@ -598,7 +605,7 @@
                         name: cells[1]?.v || '',
                         category: cells[4]?.v || 'General',
                         supplier: cells[5]?.v || 'Proveedor',
-                        photo_url: cells[7]?.v || null, // Columna para foto si existe
+                        photo_url: cells[7]?.v || null, // Columna H: foto del proveedor
                     };
                 }).filter(p => p.name && p.name.length > 3);
 
@@ -607,12 +614,137 @@
                 updateStats();
                 renderProducts();
                 populateFilters();
+                
+                // Buscar imágenes automáticamente para productos sin foto
+                await searchMissingImages();
+                
             } catch (error) {
                 console.error('Error cargando productos:', error);
                 allProducts = [];
             } finally {
                 showLoading(false);
             }
+        }
+
+        // ==========================================
+        // BÚSQUEDA AUTOMÁTICA DE IMÁGENES
+        // ==========================================
+        async function searchMissingImages() {
+            const productsWithoutPhoto = allProducts.filter(p => !p.photo_url);
+            
+            if (productsWithoutPhoto.length === 0) {
+                console.log('✅ Todos los productos tienen foto');
+                return;
+            }
+
+            console.log(`🔍 Buscando imágenes para ${productsWithoutPhoto.length} productos...`);
+
+            // Buscar en lotes para no saturar la API
+            for (let i = 0; i < productsWithoutPhoto.length; i++) {
+                const product = productsWithoutPhoto[i];
+                
+                // Evitar buscar si ya está en cache
+                if (imageCache[product.name]) {
+                    product.photo_url = imageCache[product.name];
+                    continue;
+                }
+
+                // Buscar imagen
+                const imageUrl = await searchProductImage(product.name, product.category);
+                
+                if (imageUrl) {
+                    product.photo_url = imageUrl;
+                    imageCache[product.name] = imageUrl;
+                    console.log(`✅ Imagen encontrada para: ${product.name}`);
+                    
+                    // Re-renderizar cada 5 productos para mostrar progreso
+                    if (i % 5 === 0) {
+                        renderProducts();
+                    }
+                }
+
+                // Pequeña pausa para no saturar la API (50 requests/hora)
+                await sleep(100);
+            }
+
+            // Renderizar final con todas las imágenes
+            renderProducts();
+            console.log('✅ Búsqueda de imágenes completada');
+        }
+
+        // ==========================================
+        // BUSCAR IMAGEN EN PEXELS
+        // ==========================================
+        async function searchProductImage(productName, category) {
+            try {
+                // Limpiar nombre para búsqueda más efectiva
+                const searchQuery = cleanSearchQuery(productName);
+                
+                console.log(`🔍 Buscando imagen para: "${searchQuery}"`);
+
+                const response = await fetch(
+                    `https://api.pexels.com/v1/search?query=${encodeURIComponent(searchQuery)}&per_page=1&orientation=square`,
+                    {
+                        headers: {
+                            'Authorization': PEXELS_API_KEY
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    console.warn(`⚠️ Error en Pexels API: ${response.status}`);
+                    return null;
+                }
+
+                const data = await response.json();
+
+                if (data.photos && data.photos.length > 0) {
+                    // Usar imagen mediana para balance entre calidad y velocidad
+                    return data.photos[0].src.medium;
+                }
+
+                console.log(`⚠️ No se encontró imagen para: ${productName}`);
+                return null;
+
+            } catch (error) {
+                console.error('Error buscando imagen:', error);
+                return null;
+            }
+        }
+
+        // ==========================================
+        // LIMPIAR QUERY DE BÚSQUEDA
+        // ==========================================
+        function cleanSearchQuery(productName) {
+            // Extraer palabras clave principales del nombre del producto
+            let query = productName
+                .toLowerCase()
+                // Remover números de modelo complejos
+                .replace(/\b[a-z0-9]{8,}\b/gi, '')
+                // Remover códigos y seriales
+                .replace(/\b\w*\d{3,}\w*\b/g, '')
+                // Remover palabras comunes que no ayudan
+                .replace(/\b(con|sin|para|de|la|el|en|y|o|hasta|incluye|nuevo|nueva)\b/gi, '')
+                // Quedarse solo con las primeras 2-3 palabras importantes
+                .split(/\s+/)
+                .filter(word => word.length > 2)
+                .slice(0, 3)
+                .join(' ')
+                .trim();
+
+            // Si quedó muy corto o vacío, usar el nombre original
+            if (query.length < 3) {
+                query = productName.split(' ').slice(0, 2).join(' ');
+            }
+
+            return query;
+        }
+
+        // ==========================================
+        // UTILIDADES
+        // ==========================================
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
         }
 
         // ==========================================
@@ -657,12 +789,24 @@
                 }
 
                 const categoryIcon = getCategoryIcon(product.category);
-                const photoHTML = product.photo_url 
-                    ? `<img src="${product.photo_url}" alt="${product.name}" onerror="this.parentElement.classList.add('placeholder'); this.style.display='none'; this.parentElement.innerHTML='${categoryIcon}';">`
-                    : `<div class="product-image placeholder">${categoryIcon}</div>`;
+                
+                // Determinar qué mostrar: foto real o placeholder
+                let imageHTML;
+                if (product.photo_url) {
+                    imageHTML = `
+                        <div class="product-image">
+                            <img src="${product.photo_url}" 
+                                 alt="${product.name}" 
+                                 onerror="this.parentElement.classList.add('placeholder'); this.style.display='none'; this.parentElement.innerHTML='${categoryIcon}';"
+                                 loading="lazy">
+                        </div>
+                    `;
+                } else {
+                    imageHTML = `<div class="product-image placeholder">${categoryIcon}</div>`;
+                }
 
                 card.innerHTML = `
-                    ${photoHTML.includes('<img') ? `<div class="product-image">${photoHTML}</div>` : photoHTML}
+                    ${imageHTML}
                     <div class="product-checkbox"></div>
                     <div class="product-info">
                         <div class="product-name">${product.name}</div>
@@ -789,6 +933,7 @@
         // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 Iniciando Catálogo PIXCELL...');
+            console.log('🎨 Sistema de imágenes automáticas: ACTIVADO');
             loadProducts();
 
             // Event listeners
