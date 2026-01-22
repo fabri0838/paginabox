@@ -134,7 +134,7 @@
         /* Controles modernos */
         .controls {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr;
             gap: 1rem;
             margin-bottom: 3rem;
         }
@@ -480,10 +480,6 @@
             <select id="categoryFilter">
                 <option value="">Todas las categorías</option>
             </select>
-
-            <select id="supplierFilter">
-                <option value="">Todos los proveedores</option>
-            </select>
         </div>
 
         <div class="products-grid" id="productsGrid"></div>
@@ -695,18 +691,15 @@
         function renderProducts() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const categoryFilter = document.getElementById('categoryFilter').value;
-            const supplierFilter = document.getElementById('supplierFilter').value;
 
             let filtered = allProducts.filter(p => {
                 const matchesSearch = !searchTerm || 
                     p.name.toLowerCase().includes(searchTerm) ||
-                    p.category.toLowerCase().includes(searchTerm) ||
-                    p.supplier.toLowerCase().includes(searchTerm);
+                    p.category.toLowerCase().includes(searchTerm);
                 
                 const matchesCategory = !categoryFilter || p.category === categoryFilter;
-                const matchesSupplier = !supplierFilter || p.supplier === supplierFilter;
 
-                return matchesSearch && matchesCategory && matchesSupplier;
+                return matchesSearch && matchesCategory;
             });
 
             const grid = document.getElementById('productsGrid');
@@ -741,7 +734,6 @@
                         <div class="product-name">${product.name}</div>
                         <div class="product-meta">
                             <span class="badge badge-category">${product.category}</span>
-                            <span class="badge badge-supplier">${product.supplier}</span>
                         </div>
                     </div>
                 `;
@@ -782,20 +774,13 @@
 
         function populateFilters() {
             const categories = [...new Set(allProducts.map(p => p.category))].sort();
-            const suppliers = [...new Set(allProducts.map(p => p.supplier))].sort();
 
             const categoryFilter = document.getElementById('categoryFilter');
-            const supplierFilter = document.getElementById('supplierFilter');
 
             categoryFilter.innerHTML = '<option value="">Todas las categorías</option>';
-            supplierFilter.innerHTML = '<option value="">Todos los proveedores</option>';
 
             categories.forEach(cat => {
                 categoryFilter.innerHTML += `<option value="${cat}">${cat}</option>`;
-            });
-
-            suppliers.forEach(sup => {
-                supplierFilter.innerHTML += `<option value="${sup}">${sup}</option>`;
             });
         }
 
@@ -844,7 +829,6 @@
 
             document.getElementById('searchInput').addEventListener('input', renderProducts);
             document.getElementById('categoryFilter').addEventListener('change', renderProducts);
-            document.getElementById('supplierFilter').addEventListener('change', renderProducts);
         });
     </script>
 </body>
