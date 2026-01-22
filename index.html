@@ -212,7 +212,7 @@
         /* Área del ícono del producto */
         .product-icon-area {
             height: 180px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #e8f0f8 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -221,14 +221,17 @@
         }
 
         .product-icon {
-            width: 120px;
-            height: 120px;
-            opacity: 0.15;
+            width: 100px;
+            height: 100px;
+            opacity: 0.4;
+            stroke: #94a3b8;
+            transition: all 0.3s ease;
         }
 
         .product-card:hover .product-icon {
-            opacity: 0.25;
-            transform: scale(1.05);
+            opacity: 0.6;
+            transform: scale(1.08);
+            stroke: #64748b;
         }
 
         /* Checkbox de selección */
@@ -505,26 +508,34 @@
         let selectedProducts = new Set();
 
         // Íconos SVG por categoría (estilo line art)
-        function getCategoryIcon(category) {
+        function getCategoryIcon(category, productName) {
             const cat = category.toLowerCase();
+            const name = productName.toLowerCase();
             
-            // Auriculares / Audio
-            if (cat.includes('audio') || cat.includes('auricular') || cat.includes('parlante')) {
+            // Auriculares / Audio (PRIORIDAD: buscar en nombre también)
+            if (name.includes('auricular') || name.includes('airpod') || name.includes('earbud') || 
+                name.includes('headphone') || cat.includes('auricular') || 
+                name.includes('parlante') || name.includes('speaker') || name.includes('bocina') ||
+                cat.includes('audio') || cat.includes('parlante')) {
                 return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M12 2C6.5 2 2 6.5 2 12v6c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-4c0-1.1-.9-2-2-2H4c0-4.4 3.6-8 8-8s8 3.6 8 8h-2c-1.1 0-2 .9-2 2v4c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-6c0-5.5-4.5-10-10-10z"/>
                 </svg>`;
             }
             
-            // Teléfonos / Telefonía
-            if (cat.includes('telefon') || cat.includes('celular') || cat.includes('smartphone')) {
+            // Teléfonos / Telefonía (buscar iPhone, Samsung, etc)
+            if (name.includes('iphone') || name.includes('samsung') || name.includes('galaxy') ||
+                name.includes('xiaomi') || name.includes('motorola') || name.includes('celular') ||
+                name.includes('smartphone') || name.includes('telefon') || 
+                cat.includes('telefon') || cat.includes('celular')) {
                 return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
                     <line x1="12" y1="18" x2="12.01" y2="18"/>
                 </svg>`;
             }
             
-            // Informática / Computadoras
-            if (cat.includes('informatica') || cat.includes('notebook') || cat.includes('computador')) {
+            // Notebooks / Laptops
+            if (name.includes('notebook') || name.includes('laptop') || name.includes('macbook') ||
+                cat.includes('informatica') || cat.includes('computador')) {
                 return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
                     <line x1="8" y1="21" x2="16" y2="21"/>
@@ -532,8 +543,9 @@
                 </svg>`;
             }
             
-            // TV / Televisores
-            if (cat.includes('tv') || cat.includes('televisor') || cat.includes('monitor')) {
+            // TV / Televisores / Monitores
+            if (name.includes('tv') || name.includes('televisor') || name.includes('smart tv') ||
+                name.includes('monitor') || cat.includes('tv') || cat.includes('televisor')) {
                 return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <rect x="2" y="7" width="20" height="15" rx="2" ry="2"/>
                     <polyline points="17 2 12 7 7 2"/>
@@ -541,26 +553,62 @@
             }
             
             // Cámaras / Fotografía
-            if (cat.includes('camara') || cat.includes('fotografia') || cat.includes('foto')) {
+            if (name.includes('camara') || name.includes('gopro') || name.includes('canon') ||
+                name.includes('nikon') || cat.includes('camara') || cat.includes('fotografia')) {
                 return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                     <circle cx="12" cy="13" r="4"/>
                 </svg>`;
             }
             
-            // Gaming / Videojuegos
-            if (cat.includes('gaming') || cat.includes('juego') || cat.includes('consola')) {
+            // Tablets / iPads
+            if (name.includes('tablet') || name.includes('ipad')) {
                 return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <line x1="6" y1="12" x2="6.01" y2="12"/>
-                    <line x1="18" y1="12" x2="18.01" y2="12"/>
-                    <path d="M6 8h12a6 6 0 0 1 6 6v4a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4v-4a6 6 0 0 1 6-6z"/>
-                    <circle cx="10" cy="12" r="1"/>
-                    <circle cx="14" cy="12" r="1"/>
+                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+                    <line x1="12" y1="18" x2="12.01" y2="18"/>
                 </svg>`;
             }
             
-            // Accesorios / Cables
-            if (cat.includes('accesorio') || cat.includes('cable') || cat.includes('cargador')) {
+            // Mouse
+            if (name.includes('mouse') || name.includes('raton')) {
+                return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M12 2a7 7 0 0 0-7 7v6a7 7 0 0 0 14 0V9a7 7 0 0 0-7-7z"/>
+                    <line x1="12" y1="7" x2="12" y2="11"/>
+                </svg>`;
+            }
+            
+            // Teclado
+            if (name.includes('teclado') || name.includes('keyboard')) {
+                return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="4" width="20" height="16" rx="2"/>
+                    <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/>
+                </svg>`;
+            }
+            
+            // Gaming / Consolas
+            if (name.includes('playstation') || name.includes('xbox') || name.includes('nintendo') ||
+                name.includes('switch') || name.includes('ps5') || name.includes('ps4') ||
+                cat.includes('gaming') || cat.includes('juego') || cat.includes('consola')) {
+                return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M6 8h12a6 6 0 0 1 6 6v4a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4v-4a6 6 0 0 1 6-6z"/>
+                    <circle cx="9" cy="14" r="1"/>
+                    <circle cx="15" cy="14" r="1"/>
+                </svg>`;
+            }
+            
+            // Cables / Cargadores
+            if (name.includes('cable') || name.includes('cargador') || name.includes('usb') ||
+                name.includes('charging') || cat.includes('cable') || cat.includes('accesorio')) {
+                return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M20 7h-9"/>
+                    <path d="M14 17H5"/>
+                    <circle cx="17" cy="17" r="3"/>
+                    <circle cx="7" cy="7" r="3"/>
+                </svg>`;
+            }
+            
+            // Fundas / Cases
+            if (name.includes('funda') || name.includes('case') || name.includes('protector')) {
                 return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                     <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
@@ -568,16 +616,9 @@
                 </svg>`;
             }
             
-            // Hogar / Smart Home
-            if (cat.includes('hogar') || cat.includes('smart') || cat.includes('domotica')) {
-                return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                    <polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>`;
-            }
-            
             // Wearables / Relojes
-            if (cat.includes('wearable') || cat.includes('reloj') || cat.includes('watch')) {
+            if (name.includes('watch') || name.includes('reloj') || name.includes('smartwatch') ||
+                name.includes('fitbit') || cat.includes('wearable')) {
                 return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <circle cx="12" cy="12" r="7"/>
                     <polyline points="12 9 12 12 13.5 13.5"/>
@@ -585,16 +626,24 @@
                 </svg>`;
             }
             
-            // Mouse / Teclado
-            if (cat.includes('mouse') || cat.includes('teclado') || cat.includes('keyboard')) {
+            // Powerbank / Batería
+            if (name.includes('powerbank') || name.includes('bateria') || name.includes('power bank')) {
                 return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M12 6h.01M8 6h.01M4 6h.01M16 6h.01M20 6h.01M12 10h.01M8 10h.01M4 10h.01M16 10h.01M20 10h.01M12 14h.01M8 14h.01M4 14h.01M16 14h.01M20 14h.01M8 18h8"/>
-                    <rect x="2" y="4" width="20" height="16" rx="2"/>
+                    <rect x="1" y="6" width="18" height="12" rx="2" ry="2"/>
+                    <line x1="23" y1="13" x2="23" y2="11"/>
                 </svg>`;
             }
             
-            // Default / General
-            return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            // Memoria / Pendrive / Disco
+            if (name.includes('pendrive') || name.includes('usb') || name.includes('disco') ||
+                name.includes('memoria') || name.includes('ssd') || name.includes('hdd')) {
+                return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>`;
+            }
+            
+            // Default / General (hexágono como en tu imagen)
+            return `<svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
             </svg>`;
         }
@@ -681,7 +730,7 @@
                     card.classList.add('selected');
                 }
 
-                const icon = getCategoryIcon(product.category);
+                const icon = getCategoryIcon(product.category, product.name);
 
                 card.innerHTML = `
                     <div class="product-icon-area">
