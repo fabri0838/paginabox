@@ -21,7 +21,6 @@
             --text: #e4e4e7;
             --text-dim: #a1a1aa;
             --border: #27273a;
-            --surface: #161b2e;
         }
 
         body {
@@ -32,7 +31,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated gradient background */
         body::before {
             content: '';
             position: fixed;
@@ -59,7 +57,6 @@
             padding-bottom: 120px;
         }
 
-        /* Header con logo */
         header {
             text-align: center;
             margin-bottom: 3rem;
@@ -91,18 +88,47 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Controles */
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: var(--secondary);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
         .controls {
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
             margin-bottom: 2rem;
-            animation: slideDown 0.6s ease;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .search-box {
@@ -148,15 +174,12 @@
             padding-right: 3rem;
         }
 
-        /* Grid de productos */
         .products-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
-            animation: fadeIn 0.8s ease 0.2s both;
         }
 
-        /* Tarjeta de producto */
         .product-card {
             background: var(--secondary);
             border: 2px solid var(--border);
@@ -165,7 +188,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
-            height: 420px;
+            height: 380px;
             display: flex;
             flex-direction: column;
         }
@@ -191,35 +214,19 @@
             background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
         }
 
-        /* Foto del producto */
         .product-image {
             width: 100%;
             height: 240px;
-            object-fit: cover;
-            background: linear-gradient(135deg, #1a1f3a 0%, #0f1420 100%);
-            position: relative;
-        }
-
-        .product-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* Placeholder cuando no hay foto */
-        .product-image.placeholder {
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 4rem;
-            color: var(--text-dim);
             background: linear-gradient(135deg, 
                 rgba(0, 255, 136, 0.05) 0%, 
                 rgba(0, 212, 255, 0.05) 100%
             );
         }
 
-        /* Checkbox de selección */
         .product-checkbox {
             position: absolute;
             top: 1rem;
@@ -253,7 +260,6 @@
             color: var(--primary);
         }
 
-        /* Info del producto */
         .product-info {
             padding: 1.2rem;
             flex: 1;
@@ -262,16 +268,15 @@
         }
 
         .product-name {
-            font-size: 0.95rem;
+            font-size: 1.05rem;
             font-weight: 600;
             color: var(--text);
-            line-height: 1.3;
+            line-height: 1.4;
             margin-bottom: 0.5rem;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            min-height: 3.9rem;
         }
 
         .product-meta {
@@ -302,18 +307,12 @@
             border: 1px solid rgba(0, 212, 255, 0.3);
         }
 
-        /* Botón flotante de WhatsApp */
         .whatsapp-button {
             position: fixed;
             bottom: 2rem;
             right: 2rem;
             z-index: 1000;
-            animation: slideUp 0.6s ease;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(100px); }
-            to { opacity: 1; transform: translateY(0); }
+            display: none;
         }
 
         .whatsapp-btn {
@@ -338,10 +337,6 @@
             box-shadow: 0 15px 40px rgba(37, 211, 102, 0.5);
         }
 
-        .whatsapp-btn:active {
-            transform: translateY(-2px);
-        }
-
         .whatsapp-icon {
             font-size: 1.8rem;
         }
@@ -355,54 +350,6 @@
             font-weight: 800;
         }
 
-        /* Stats */
-        .stats {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .stat-card {
-            background: var(--secondary);
-            border: 2px solid var(--border);
-            border-radius: 16px;
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            border-color: var(--accent);
-        }
-
-        .stat-icon {
-            font-size: 1.5rem;
-        }
-
-        .stat-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Loading */
         .loading {
             display: none;
             position: fixed;
@@ -434,11 +381,11 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Empty state */
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
             color: var(--text-dim);
+            grid-column: 1/-1;
         }
 
         .empty-state-icon {
@@ -447,7 +394,6 @@
             opacity: 0.5;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .logo {
                 font-size: 3rem;
@@ -464,14 +410,6 @@
 
             .product-image {
                 height: 160px;
-            }
-
-            .product-info {
-                padding: 0.8rem;
-            }
-
-            .product-name {
-                font-size: 0.9rem;
             }
 
             .whatsapp-button {
@@ -502,14 +440,14 @@
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-icon">📦</div>
-                <div class="stat-info">
+                <div>
                     <div class="stat-label">Productos</div>
                     <div class="stat-value" id="totalProducts">0</div>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">✓</div>
-                <div class="stat-info">
+                <div>
                     <div class="stat-label">Seleccionados</div>
                     <div class="stat-value" id="selectedCount">0</div>
                 </div>
@@ -531,13 +469,10 @@
             </select>
         </div>
 
-        <div class="products-grid" id="productsGrid">
-            <!-- Productos se cargan aquí -->
-        </div>
+        <div class="products-grid" id="productsGrid"></div>
     </div>
 
-    <!-- Botón flotante de WhatsApp -->
-    <div class="whatsapp-button" id="whatsappButton" style="display: none;">
+    <div class="whatsapp-button" id="whatsappButton">
         <button class="whatsapp-btn" onclick="sendWhatsApp()">
             <span class="whatsapp-icon">💬</span>
             <span>Cotizar Pedido</span>
@@ -546,56 +481,33 @@
     </div>
 
     <script>
-        // ==========================================
-        // CONFIGURACIÓN
-        // ==========================================
         const SHEET_ID = '18miA785ppfYJztjqNCKB4aZM7xvUJSKen36PhkjrT5Y';
         const SHEET_NAME = 'Hoja 1';
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
-        const WHATSAPP_NUMBER = '5493513504294'; // +54 9 3513 50-4294
-        
-        // API de Pexels para búsqueda automática de imágenes
-        const PEXELS_API_KEY = 'ueoBLWqSSIZHRHNdBQIrMTJgXCN67qvyN6g8K5rUp1QNn2S6JWkGuc7E';
+        const WHATSAPP_NUMBER = '5493513504294';
 
-        // Emojis para categorías (placeholder si no hay foto)
         const CATEGORY_ICONS = {
-            'audio': '🔊',
-            'telefonia': '📱',
-            'informatica': '💻',
-            'hogar': '🏠',
-            'gaming': '🎮',
-            'accesorios': '🔌',
-            'tv': '📺',
-            'fotografia': '📷',
-            'wearables': '⌚',
+            'audio': '🔊', 'telefonia': '📱', 'informatica': '💻',
+            'hogar': '🏠', 'gaming': '🎮', 'accesorios': '🔌',
+            'tv': '📺', 'fotografia': '📷', 'wearables': '⌚',
             'general': '📦'
         };
 
-        // Cache de imágenes para evitar búsquedas repetidas
-        const imageCache = {};
-
-        // ==========================================
-        // VARIABLES GLOBALES
-        // ==========================================
         let allProducts = [];
         let selectedProducts = new Set();
-        let loadingImages = new Set();
 
-        // ==========================================
-        // CARGAR PRODUCTOS
-        // ==========================================
         async function loadProducts() {
             showLoading(true);
             try {
+                console.log('📡 Cargando productos...');
                 const response = await fetch(SHEET_URL);
                 const text = await response.text();
                 const json = JSON.parse(text.substring(47, text.length - 2));
                 
                 if (!json.table || !json.table.rows) {
-                    console.log('No hay productos disponibles');
+                    console.log('⚠️ No hay productos');
                     allProducts = [];
                     renderProducts();
-                    showLoading(false);
                     return;
                 }
 
@@ -605,272 +517,28 @@
                         id: cells[0]?.v || index + 1,
                         name: cells[1]?.v || '',
                         category: cells[4]?.v || 'General',
-                        supplier: cells[5]?.v || 'Proveedor',
-                        photo_url: cells[7]?.v || null, // Columna H: foto del proveedor
-                        image_searched: false, // Flag para saber si ya se buscó
+                        supplier: cells[5]?.v || 'Proveedor'
                     };
                 }).filter(p => p.name && p.name.length > 3);
 
                 console.log(`✅ ${allProducts.length} productos cargados`);
-                
                 updateStats();
                 renderProducts();
                 populateFilters();
-                
-                // NO buscar imágenes automáticamente al inicio
-                // Se buscarán bajo demanda cuando sean visibles
-                console.log('💡 Las imágenes se cargarán automáticamente al hacer scroll');
-                
             } catch (error) {
-                console.error('Error cargando productos:', error);
-                allProducts = [];
+                console.error('❌ Error:', error);
+                document.getElementById('productsGrid').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <h3>Error al cargar productos</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
             } finally {
                 showLoading(false);
             }
         }
 
-        // ==========================================
-        // BÚSQUEDA BAJO DEMANDA (LAZY)
-        // ==========================================
-        async function searchImageForProduct(product) {
-            // Si ya tiene foto del proveedor o ya buscamos, no hacer nada
-            if (product.photo_url || product.image_searched || loadingImages.has(product.id)) {
-                return;
-            }
-
-            // Marcar que estamos buscando
-            loadingImages.add(product.id);
-            product.image_searched = true;
-
-            // Buscar en cache primero
-            if (imageCache[product.name]) {
-                product.photo_url = imageCache[product.name];
-                loadingImages.delete(product.id);
-                return;
-            }
-
-            // Buscar imagen
-            const imageUrl = await searchProductImage(product.name, product.category);
-            
-            if (imageUrl) {
-                product.photo_url = imageUrl;
-                imageCache[product.name] = imageUrl;
-                console.log(`✅ Imagen cargada: ${product.name.substring(0, 40)}...`);
-                
-                // Re-renderizar solo esta tarjeta
-                updateProductCard(product);
-            }
-
-            loadingImages.delete(product.id);
-        }
-
-        // ==========================================
-        // ACTUALIZAR TARJETA INDIVIDUAL
-        // ==========================================
-        function updateProductCard(product) {
-            const cards = document.querySelectorAll('.product-card');
-            cards.forEach(card => {
-                const nameElement = card.querySelector('.product-name');
-                if (nameElement && nameElement.textContent === product.name) {
-                    const imageContainer = card.querySelector('.product-image');
-                    if (imageContainer && product.photo_url) {
-                        imageContainer.classList.remove('placeholder');
-                        imageContainer.innerHTML = `
-                            <img src="${product.photo_url}" 
-                                 alt="${product.name}" 
-                                 loading="lazy"
-                                 onerror="this.parentElement.classList.add('placeholder'); this.style.display='none';">
-                        `;
-                    }
-                }
-            });
-        }
-
-        // ==========================================
-        // OBSERVER PARA LAZY LOADING
-        // ==========================================
-        let imageObserver = null;
-
-        function setupImageObserver() {
-            // Limpiar observer anterior si existe
-            if (imageObserver) {
-                imageObserver.disconnect();
-            }
-
-            // Crear nuevo Intersection Observer
-            imageObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const card = entry.target;
-                        const productName = card.querySelector('.product-name')?.textContent;
-                        
-                        if (productName) {
-                            const product = allProducts.find(p => p.name === productName);
-                            if (product && !product.photo_url && !product.image_searched) {
-                                // Buscar imagen cuando la tarjeta es visible
-                                searchImageForProduct(product);
-                            }
-                        }
-                    }
-                });
-            }, {
-                rootMargin: '200px' // Empezar a cargar 200px antes de que sea visible
-            });
-
-            // Observar todas las tarjetas
-            document.querySelectorAll('.product-card').forEach(card => {
-                imageObserver.observe(card);
-            });
-        }
-
-        // ==========================================
-        // BUSCAR IMAGEN EN PEXELS
-        // ==========================================
-        async function searchProductImage(productName, category) {
-            try {
-                // Generar múltiples queries, en orden de prioridad
-                const queries = generateSmartQueries(productName, category);
-                
-                console.log(`🔍 Producto: "${productName}"`);
-                console.log(`📋 Intentando con:`, queries);
-
-                // Intentar con cada query hasta encontrar resultado
-                for (let i = 0; i < queries.length; i++) {
-                    const query = queries[i];
-                    console.log(`   Intento ${i+1}: "${query}"`);
-                    
-                    const imageUrl = await searchPexels(query);
-                    
-                    if (imageUrl) {
-                        console.log(`   ✅ ENCONTRADA con: "${query}"`);
-                        return imageUrl;
-                    }
-                }
-
-                console.log(`   ❌ Sin resultados para: ${productName}`);
-                return null;
-
-            } catch (error) {
-                console.error('Error buscando imagen:', error);
-                return null;
-            }
-        }
-
-        // ==========================================
-        // GENERAR QUERIES INTELIGENTES
-        // ==========================================
-        function generateSmartQueries(productName, category) {
-            const queries = [];
-            const lower = productName.toLowerCase();
-            
-            // Marcas conocidas
-            const brands = ['xiaomi', 'samsung', 'apple', 'sony', 'lg', 'jbl', 'bose', 
-                           'hp', 'dell', 'lenovo', 'asus', 'logitech', 'tp-link'];
-            
-            const brand = brands.find(b => lower.includes(b));
-            
-            // Tipos de producto (inglés para Pexels)
-            const productTypes = {
-                'mouse': 'computer mouse',
-                'teclado': 'keyboard',
-                'auricular': 'headphones',
-                'parlante': 'bluetooth speaker',
-                'cargador': 'phone charger',
-                'cable': 'usb cable',
-                'adaptador': 'adapter',
-                'router': 'wifi router',
-                'repetidor': 'wifi extender',
-                'extensor': 'wifi extender',
-                'cafetera': 'coffee machine',
-                'bateria': 'power bank',
-                'powerbank': 'power bank',
-                'smartwatch': 'smart watch',
-                'reloj': 'smart watch',
-                'balanza': 'digital scale',
-                'webcam': 'webcam',
-                'microfono': 'microphone',
-                'lampara': 'smart lamp',
-                'bomba': 'air pump',
-                'inflador': 'air pump',
-                'destornillador': 'electric screwdriver'
-            };
-            
-            // Detectar tipo
-            let type = null;
-            for (const [spanish, english] of Object.entries(productTypes)) {
-                if (lower.includes(spanish)) {
-                    type = english;
-                    break;
-                }
-            }
-            
-            // QUERY 1: Marca + Tipo (MUY específico)
-            if (brand && type) {
-                queries.push(`${brand} ${type}`);
-            }
-            
-            // QUERY 2: Solo tipo + "product" o "device"
-            if (type) {
-                queries.push(`${type} product`);
-                queries.push(`${type} device`);
-            }
-            
-            // QUERY 3: Marca + "technology"
-            if (brand) {
-                queries.push(`${brand} technology product`);
-            }
-            
-            // QUERY 4: Categoría en inglés
-            const categoryMap = {
-                'accesorios': 'tech accessories',
-                'audio': 'audio equipment',
-                'gadget': 'gadgets',
-                'general': 'electronics'
-            };
-            
-            const catKey = Object.keys(categoryMap).find(k => 
-                category.toLowerCase().includes(k)
-            );
-            
-            if (catKey) {
-                queries.push(categoryMap[catKey]);
-            }
-            
-            // QUERY 5: Fallback genérico
-            queries.push('modern gadget');
-            
-            return [...new Set(queries)]; // Remover duplicados
-        }
-
-        // ==========================================
-        // BUSCAR EN PEXELS
-        // ==========================================
-        async function searchPexels(query) {
-            try {
-                const response = await fetch(
-                    `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1&orientation=square`,
-                    {
-                        headers: {
-                            'Authorization': PEXELS_API_KEY
-                        }
-                    }
-                );
-
-                if (!response.ok) return null;
-
-                const data = await response.json();
-                
-                if (data.photos && data.photos.length > 0) {
-                    return data.photos[0].src.medium;
-                }
-
-                return null;
-            } catch (error) {
-                return null;
-            }
-        // ==========================================
-        // RENDERIZAR PRODUCTOS
-        // ==========================================
         function renderProducts() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const categoryFilter = document.getElementById('categoryFilter').value;
@@ -909,26 +577,10 @@
                     card.classList.add('selected');
                 }
 
-                const categoryIcon = getCategoryIcon(product.category);
-                
-                // Determinar qué mostrar: foto real o placeholder
-                let imageHTML;
-                if (product.photo_url) {
-                    imageHTML = `
-                        <div class="product-image">
-                            <img src="${product.photo_url}" 
-                                 alt="${product.name}" 
-                                 onerror="this.parentElement.classList.add('placeholder'); this.style.display='none'; this.parentElement.innerHTML='${categoryIcon}';"
-                                 loading="lazy">
-                        </div>
-                    `;
-                } else {
-                    // Mostrar placeholder, la imagen se cargará cuando sea visible
-                    imageHTML = `<div class="product-image placeholder">${categoryIcon}</div>`;
-                }
+                const icon = getCategoryIcon(product.category);
 
                 card.innerHTML = `
-                    ${imageHTML}
+                    <div class="product-image">${icon}</div>
                     <div class="product-checkbox"></div>
                     <div class="product-info">
                         <div class="product-name">${product.name}</div>
@@ -944,20 +596,12 @@
             });
 
             updateStats();
-            
-            // Configurar observer para lazy loading de imágenes
-            setTimeout(() => setupImageObserver(), 100);
         }
 
-        // ==========================================
-        // FUNCIONES AUXILIARES
-        // ==========================================
         function getCategoryIcon(category) {
             const cat = category.toLowerCase();
             for (const [key, icon] of Object.entries(CATEGORY_ICONS)) {
-                if (cat.includes(key)) {
-                    return icon;
-                }
+                if (cat.includes(key)) return icon;
             }
             return CATEGORY_ICONS.general;
         }
@@ -1012,9 +656,6 @@
             document.getElementById('loading').classList.toggle('active', show);
         }
 
-        // ==========================================
-        // ENVIAR POR WHATSAPP
-        // ==========================================
         function sendWhatsApp() {
             if (selectedProducts.size === 0) {
                 alert('⚠️ Seleccioná al menos un producto para cotizar');
@@ -1023,7 +664,6 @@
 
             const selected = allProducts.filter(p => selectedProducts.has(p.id));
             
-            // Agrupar por proveedor
             const bySupplier = {};
             selected.forEach(p => {
                 if (!bySupplier[p.supplier]) {
@@ -1032,7 +672,6 @@
                 bySupplier[p.supplier].push(p);
             });
 
-            // Crear mensaje
             let message = '¡Hola PIXCELL! Me interesa cotizar estos productos:\n\n';
             
             for (const [supplier, products] of Object.entries(bySupplier)) {
@@ -1046,22 +685,16 @@
             message += `Total: ${selected.length} producto${selected.length > 1 ? 's' : ''}\n\n`;
             message += '¿Podrían enviarme precios y disponibilidad?\n\n¡Gracias!';
 
-            // Abrir WhatsApp
             const encodedMessage = encodeURIComponent(message);
             const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
             
             window.open(whatsappURL, '_blank');
         }
 
-        // ==========================================
-        // INICIALIZACIÓN
-        // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 Iniciando Catálogo PIXCELL...');
-            console.log('🎨 Sistema de imágenes automáticas: ACTIVADO');
             loadProducts();
 
-            // Event listeners
             document.getElementById('searchInput').addEventListener('input', renderProducts);
             document.getElementById('categoryFilter').addEventListener('change', renderProducts);
             document.getElementById('supplierFilter').addEventListener('change', renderProducts);
