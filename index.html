@@ -165,7 +165,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
-            height: 380px;
+            height: 420px;
             display: flex;
             flex-direction: column;
         }
@@ -262,15 +262,16 @@
         }
 
         .product-name {
-            font-size: 1.05rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: var(--text);
-            line-height: 1.4;
+            line-height: 1.3;
             margin-bottom: 0.5rem;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            min-height: 3.9rem;
         }
 
         .product-meta {
@@ -606,6 +607,7 @@
                         category: cells[4]?.v || 'General',
                         supplier: cells[5]?.v || 'Proveedor',
                         photo_url: cells[7]?.v || null, // Columna H: foto del proveedor
+                        image_searched: false, // Flag para saber si ya se buscó
                     };
                 }).filter(p => p.name && p.name.length > 3);
 
@@ -615,8 +617,9 @@
                 renderProducts();
                 populateFilters();
                 
-                // Buscar imágenes automáticamente para productos sin foto
-                await searchMissingImages();
+                // NO buscar imágenes automáticamente al inicio
+                // Se buscarán bajo demanda cuando sean visibles
+                console.log('💡 Las imágenes se cargarán automáticamente al hacer scroll');
                 
             } catch (error) {
                 console.error('Error cargando productos:', error);
@@ -627,49 +630,97 @@
         }
 
         // ==========================================
-        // BÚSQUEDA AUTOMÁTICA DE IMÁGENES
+        // BÚSQUEDA BAJO DEMANDA (LAZY)
         // ==========================================
-        async function searchMissingImages() {
-            const productsWithoutPhoto = allProducts.filter(p => !p.photo_url);
-            
-            if (productsWithoutPhoto.length === 0) {
-                console.log('✅ Todos los productos tienen foto');
+        async function searchImageForProduct(product) {
+            // Si ya tiene foto del proveedor o ya buscamos, no hacer nada
+            if (product.photo_url || product.image_searched || loadingImages.has(product.id)) {
                 return;
             }
 
-            console.log(`🔍 Buscando imágenes para ${productsWithoutPhoto.length} productos...`);
+            // Marcar que estamos buscando
+            loadingImages.add(product.id);
+            product.image_searched = true;
 
-            // Buscar en lotes para no saturar la API
-            for (let i = 0; i < productsWithoutPhoto.length; i++) {
-                const product = productsWithoutPhoto[i];
-                
-                // Evitar buscar si ya está en cache
-                if (imageCache[product.name]) {
-                    product.photo_url = imageCache[product.name];
-                    continue;
-                }
-
-                // Buscar imagen
-                const imageUrl = await searchProductImage(product.name, product.category);
-                
-                if (imageUrl) {
-                    product.photo_url = imageUrl;
-                    imageCache[product.name] = imageUrl;
-                    console.log(`✅ Imagen encontrada para: ${product.name}`);
-                    
-                    // Re-renderizar cada 5 productos para mostrar progreso
-                    if (i % 5 === 0) {
-                        renderProducts();
-                    }
-                }
-
-                // Pequeña pausa para no saturar la API (50 requests/hora)
-                await sleep(100);
+            // Buscar en cache primero
+            if (imageCache[product.name]) {
+                product.photo_url = imageCache[product.name];
+                loadingImages.delete(product.id);
+                return;
             }
 
-            // Renderizar final con todas las imágenes
-            renderProducts();
-            console.log('✅ Búsqueda de imágenes completada');
+            // Buscar imagen
+            const imageUrl = await searchProductImage(product.name, product.category);
+            
+            if (imageUrl) {
+                product.photo_url = imageUrl;
+                imageCache[product.name] = imageUrl;
+                console.log(`✅ Imagen cargada: ${product.name.substring(0, 40)}...`);
+                
+                // Re-renderizar solo esta tarjeta
+                updateProductCard(product);
+            }
+
+            loadingImages.delete(product.id);
+        }
+
+        // ==========================================
+        // ACTUALIZAR TARJETA INDIVIDUAL
+        // ==========================================
+        function updateProductCard(product) {
+            const cards = document.querySelectorAll('.product-card');
+            cards.forEach(card => {
+                const nameElement = card.querySelector('.product-name');
+                if (nameElement && nameElement.textContent === product.name) {
+                    const imageContainer = card.querySelector('.product-image');
+                    if (imageContainer && product.photo_url) {
+                        imageContainer.classList.remove('placeholder');
+                        imageContainer.innerHTML = `
+                            <img src="${product.photo_url}" 
+                                 alt="${product.name}" 
+                                 loading="lazy"
+                                 onerror="this.parentElement.classList.add('placeholder'); this.style.display='none';">
+                        `;
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // OBSERVER PARA LAZY LOADING
+        // ==========================================
+        let imageObserver = null;
+
+        function setupImageObserver() {
+            // Limpiar observer anterior si existe
+            if (imageObserver) {
+                imageObserver.disconnect();
+            }
+
+            // Crear nuevo Intersection Observer
+            imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const card = entry.target;
+                        const productName = card.querySelector('.product-name')?.textContent;
+                        
+                        if (productName) {
+                            const product = allProducts.find(p => p.name === productName);
+                            if (product && !product.photo_url && !product.image_searched) {
+                                // Buscar imagen cuando la tarjeta es visible
+                                searchImageForProduct(product);
+                            }
+                        }
+                    }
+                });
+            }, {
+                rootMargin: '200px' // Empezar a cargar 200px antes de que sea visible
+            });
+
+            // Observar todas las tarjetas
+            document.querySelectorAll('.product-card').forEach(card => {
+                imageObserver.observe(card);
+            });
         }
 
         // ==========================================
@@ -716,28 +767,161 @@
         // LIMPIAR QUERY DE BÚSQUEDA
         // ==========================================
         function cleanSearchQuery(productName) {
-            // Extraer palabras clave principales del nombre del producto
+            // Extraer marca y modelo sin limpiar demasiado
             let query = productName
                 .toLowerCase()
-                // Remover números de modelo complejos
-                .replace(/\b[a-z0-9]{8,}\b/gi, '')
-                // Remover códigos y seriales
-                .replace(/\b\w*\d{3,}\w*\b/g, '')
-                // Remover palabras comunes que no ayudan
-                .replace(/\b(con|sin|para|de|la|el|en|y|o|hasta|incluye|nuevo|nueva)\b/gi, '')
-                // Quedarse solo con las primeras 2-3 palabras importantes
-                .split(/\s+/)
-                .filter(word => word.length > 2)
-                .slice(0, 3)
-                .join(' ')
                 .trim();
-
-            // Si quedó muy corto o vacío, usar el nombre original
-            if (query.length < 3) {
-                query = productName.split(' ').slice(0, 2).join(' ');
+            
+            // Remover solo palabras muy genéricas al final
+            query = query
+                .replace(/\b(nuevo|nueva|original|100%|garantia|garantía)\b/gi, '')
+                .trim();
+            
+            // Traducir categorías comunes al inglés para mejor búsqueda
+            const translations = {
+                'auriculares': 'headphones',
+                'parlante': 'speaker',
+                'parlantes': 'speakers',
+                'mouse': 'mouse',
+                'teclado': 'keyboard',
+                'monitor': 'monitor',
+                'notebook': 'laptop',
+                'celular': 'smartphone',
+                'teléfono': 'smartphone',
+                'telefono': 'smartphone',
+                'smartwatch': 'smartwatch',
+                'reloj': 'smartwatch',
+                'tablet': 'tablet',
+                'cargador': 'charger',
+                'cable': 'cable',
+                'funda': 'case',
+                'protector': 'screen protector',
+                'bateria': 'battery',
+                'batería': 'battery'
+            };
+            
+            // Si el nombre empieza con una categoría, traducirla
+            for (const [spanish, english] of Object.entries(translations)) {
+                if (query.toLowerCase().includes(spanish)) {
+                    // Mantener marca y modelo, solo traducir categoría
+                    const parts = query.split(' ');
+                    query = parts.map(word => {
+                        if (word === spanish) return english;
+                        return word;
+                    }).join(' ');
+                    break;
+                }
             }
 
+            // Limitar a primeras 5 palabras para búsqueda más precisa
+            const words = query.split(/\s+/).filter(w => w.length > 1);
+            query = words.slice(0, 5).join(' ');
+
             return query;
+        }
+
+        // ==========================================
+        // BUSCAR IMAGEN EN PEXELS
+        // ==========================================
+        async function searchProductImage(productName, category) {
+            try {
+                // Búsqueda 1: Producto específico (marca + modelo)
+                const specificQuery = cleanSearchQuery(productName);
+                
+                console.log(`🔍 Búsqueda específica: "${specificQuery}"`);
+
+                let response = await fetch(
+                    `https://api.pexels.com/v1/search?query=${encodeURIComponent(specificQuery)}&per_page=3&orientation=square`,
+                    {
+                        headers: {
+                            'Authorization': PEXELS_API_KEY
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    console.warn(`⚠️ Error en Pexels API: ${response.status}`);
+                    return null;
+                }
+
+                let data = await response.json();
+
+                // Si encontró resultados con búsqueda específica, usar esos
+                if (data.photos && data.photos.length > 0) {
+                    console.log(`✅ Imagen específica encontrada`);
+                    return data.photos[0].src.large; // Usar large para mejor calidad
+                }
+
+                // Búsqueda 2: Fallback a categoría genérica si no encontró específico
+                console.log(`⚠️ No encontró específico, intentando categoría genérica...`);
+                
+                const categoryQuery = getCategorySearchTerm(productName, category);
+                
+                if (categoryQuery && categoryQuery !== specificQuery) {
+                    console.log(`🔍 Búsqueda genérica: "${categoryQuery}"`);
+                    
+                    response = await fetch(
+                        `https://api.pexels.com/v1/search?query=${encodeURIComponent(categoryQuery)}&per_page=1&orientation=square`,
+                        {
+                            headers: {
+                                'Authorization': PEXELS_API_KEY
+                            }
+                        }
+                    );
+
+                    if (response.ok) {
+                        data = await response.json();
+                        if (data.photos && data.photos.length > 0) {
+                            console.log(`✅ Imagen genérica encontrada`);
+                            return data.photos[0].src.large;
+                        }
+                    }
+                }
+
+                console.log(`❌ No se encontró imagen para: ${productName}`);
+                return null;
+
+            } catch (error) {
+                console.error('Error buscando imagen:', error);
+                return null;
+            }
+        }
+
+        // ==========================================
+        // OBTENER TÉRMINO DE BÚSQUEDA POR CATEGORÍA
+        // ==========================================
+        function getCategorySearchTerm(productName, category) {
+            const name = productName.toLowerCase();
+            
+            // Detectar categoría del nombre del producto
+            const categoryMap = {
+                'auricular': 'wireless headphones',
+                'parlante': 'bluetooth speaker',
+                'mouse': 'wireless mouse',
+                'teclado': 'mechanical keyboard',
+                'monitor': 'computer monitor',
+                'notebook': 'laptop computer',
+                'celular': 'smartphone',
+                'smartwatch': 'smart watch',
+                'tablet': 'tablet device',
+                'cargador': 'phone charger',
+                'cable': 'usb cable',
+                'funda': 'phone case',
+                'bateria': 'battery',
+                'camara': 'camera',
+                'tv': 'television',
+                'control': 'game controller',
+                'joystick': 'gaming joystick'
+            };
+
+            for (const [keyword, searchTerm] of Object.entries(categoryMap)) {
+                if (name.includes(keyword)) {
+                    return searchTerm;
+                }
+            }
+
+            // Si no detecta nada específico, usar categoría del producto
+            return category ? category.toLowerCase() : null;
         }
 
         // ==========================================
@@ -802,6 +986,7 @@
                         </div>
                     `;
                 } else {
+                    // Mostrar placeholder, la imagen se cargará cuando sea visible
                     imageHTML = `<div class="product-image placeholder">${categoryIcon}</div>`;
                 }
 
@@ -822,6 +1007,9 @@
             });
 
             updateStats();
+            
+            // Configurar observer para lazy loading de imágenes
+            setTimeout(() => setupImageObserver(), 100);
         }
 
         // ==========================================
